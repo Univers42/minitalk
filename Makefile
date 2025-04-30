@@ -3,13 +3,16 @@ CC = cc
 CFLAGS= -Wall -Wextra -Werror
 OBJECTS= client.o server.o
 AR = ar rcs $(OBJECTS)
-
+PROGRAM_NAME = server
+PROGRAM_NAME2 = client
+LIBFT_DIR = libft
+LIBFT = $(LIBFT_DIR)/libft.a
 edit: $(OBJECTS)
 	cc -o edit $(OBJECTS)
 
 $(OBJECTS):server.h
 	client.o server.o
-all: ; @echo
+all:
 
 bonus: pre_build $(BONUS_NAME)
 	@echo "\n$(GREEN)$(BOLD)Bonus build successful!$(RESET)"
