@@ -1,54 +1,50 @@
-NAME=minitalk.a
+NAME = minitalk
 CC = cc
-CFLAGS= -Wall -Wextra -Werror
-OBJECTS= client.o server.o
-AR = ar rcs $(OBJECTS)
-PROGRAM_NAME = server
-PROGRAM_NAME2 = client
+CFLAGS = -Wall -Wextra -Werror
+SRC_SERVER = server.c
+SRC_CLIENT = client.c
+OBJ_SERVER = $(SRC_SERVER:.c=.o)
+OBJ_CLIENT = $(SRC_CLIENT:.c=.o)
+SERVER = server
+CLIENT = client
 LIBFT_DIR = libft
 LIBFT = $(LIBFT_DIR)/libft.a
-edit: $(OBJECTS)
-	cc -o edit $(OBJECTS)
 
-$(OBJECTS):server.h
-	client.o server.o
-all:
+# Colors
+GREEN = \033[0;32m
+BLUE = \033[0;34m
+RED = \033[0;31m
+RESET = \033[0m
 
-bonus: pre_build $(BONUS_NAME)
-	@echo "\n$(GREEN)$(BOLD)Bonus build successful!$(RESET)"
+all: $(SERVER) $(CLIENT)
+	@echo "$(GREEN)Build successful!$(RESET)"
 
-pre_build:
-	@echo "$(CYAN)Starting build process...$(RESET)"
-	@mkdir -p $(OBJ_DIR)
-	@mkdir -p $(OBJ_DIR)bonus
+$(SERVER): $(OBJ_SERVER) $(LIBFT)
+	@echo "$(BLUE)Linking server...$(RESET)"
+	$(CC) $(CFLAGS) $(OBJ_SERVER) $(LIBFT) -o $(SERVER)
 
-$(NAME): $(LIBFT) $(OBJ_FILES)
-	@echo "\n$(BLUE)Linking...$(RESET)"
-	@$(CC) $(CFLAGS) $(OBJ_FILES) $(LIBFT) -o $(NAME)
-	@echo "$(GREEN)$(NAME) created!$(RESET)"
+$(CLIENT): $(OBJ_CLIENT) $(LIBFT)
+	@echo "$(BLUE)Linking client...$(RESET)"
+	$(CC) $(CFLAGS) $(OBJ_CLIENT) $(LIBFT) -o $(CLIENT)
 
-$(BONUS_NAME):$(LIBFT) $(OBJ_BONUS)
-	@echo "\n$(BLUE)"
+$(LIBFT):
+	@echo "$(BLUE)Building libft...$(RESET)"
+	@$(MAKE) -C $(LIBFT_DIR)
 
-test: all
-	@echo "$(CYAN)Running tests...$(RESET)"
-	@./tests/run_tests.sh
+%.o: %.c
+	$(CC) $(CFLAGS) -I$(LIBFT_DIR) -c $< -o $@
 
-docs:
-	@echo "$(CYAN)Generating documentation...$(RESET)"
-	@doxygen Doxyfile
-
-clean: $(OBJS)
+clean:
 	@echo "$(RED)Cleaning objects...$(RESET)"
-	@$(RM) -r edit $(OBJ_DIR)
-	@$(MAKE) -C $(LIBFT_DIR) clean
+	rm -f $(OBJ_SERVER) $(OBJ_CLIENT)
+	@if [ -d $(LIBFT_DIR) ]; then $(MAKE) -C $(LIBFT_DIR) clean 2>/dev/null || true; fi
 
-fclean: clean $(NAME)
+fclean: clean
 	@echo "$(RED)Full cleaning...$(RESET)"
-	@$(RM) $(NAME) $(BONUS_NAME)
-	@$(MAKE) -C $(LIBFT_DIR) fclean
+	rm -f $(SERVER) $(CLIENT)
+	@if [ -d $(LIBFT_DIR) ]; then $(MAKE) -C $(LIBFT_DIR) fclean 2>/dev/null || true; fi
 
-re : fclean all
+re: fclean all
 
-.PHONY clean fclean re bonus debug profile docs test help pre_build
+.PHONY: all clean fclean re
 
