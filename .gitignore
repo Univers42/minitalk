@@ -1,0 +1,7 @@
+./objs
+objs/*
+*.o
+./client_bonus
+./client
+./server
+./server_bonus
