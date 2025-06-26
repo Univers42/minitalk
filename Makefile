@@ -1,50 +1,56 @@
-NAME = minitalk
-CC = cc
-CFLAGS = -Wall -Wextra -Werror
-SRC_SERVER = server.c
-SRC_CLIENT = client.c
-OBJ_SERVER = $(SRC_SERVER:.c=.o)
-OBJ_CLIENT = $(SRC_CLIENT:.c=.o)
-SERVER = server
-CLIENT = client
-LIBFT_DIR = libft
-LIBFT = $(LIBFT_DIR)/libft.a
+NAME=minitalk.a
+PROG=client server
+PROG_BONUS=client_bonus server_bonus
+CC=cc
+CFLAGS=-Wall -Wextra -Werror -I. -I$(LIBFT_DIR) -D_GNU_SOURCE
+#CFLAGS+=-g ##Uncomment for debugging
+AR = ar rcs
+RM = rm -f
+SRCS = client.c server.c utils.c
+SRCS_BONUS=client_bonus.c server_bonus.c utils_bonus.c
+OBJ_DIR=objs
+OBJS_CLIENT=$(OBJ_DIR)/client.o $(OBJ_DIR)/utils.o
+OBJS_SERVER=$(OBJ_DIR)/server.o $(OBJ_DIR)/utils.o
+OBJS_CLIENT_BONUS=$(OBJ_DIR)/client_bonus.o $(OBJ_DIR)/utils_bonus.o
+OBJS_SERVER_BONUS=$(OBJ_DIR)/server_bonus.o $(OBJ_DIR)/utils_bonus.o
+LIBFT_DIR=libft
+LIBFT=$(LIBFT_DIR)/libft.a
 
-# Colors
-GREEN = \033[0;32m
-BLUE = \033[0;34m
-RED = \033[0;31m
-RESET = \033[0m
+MAKEFLAGS += --no-print-directory
+all: client server
 
-all: $(SERVER) $(CLIENT)
-	@echo "$(GREEN)Build successful!$(RESET)"
+client: $(OBJS_CLIENT) $(LIBFT)
+	$(CC) $(CFLAGS) -o client $(OBJS_CLIENT) -L$(LIBFT_DIR) -lft
 
-$(SERVER): $(OBJ_SERVER) $(LIBFT)
-	@echo "$(BLUE)Linking server...$(RESET)"
-	$(CC) $(CFLAGS) $(OBJ_SERVER) $(LIBFT) -o $(SERVER)
+server: $(OBJS_SERVER) $(LIBFT)
+	$(CC) $(CFLAGS) -o server $(OBJS_SERVER) -L$(LIBFT_DIR) -lft
 
-$(CLIENT): $(OBJ_CLIENT) $(LIBFT)
-	@echo "$(BLUE)Linking client...$(RESET)"
-	$(CC) $(CFLAGS) $(OBJ_CLIENT) $(LIBFT) -o $(CLIENT)
+$(OBJ_DIR)/%.o: %.c
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(LIBFT):
-	@echo "$(BLUE)Building libft...$(RESET)"
-	@$(MAKE) -C $(LIBFT_DIR)
+	$(MAKE) -C $(LIBFT_DIR)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -I$(LIBFT_DIR) -c $< -o $@
+bonus: client_bonus server_bonus
 
-clean:
-	@echo "$(RED)Cleaning objects...$(RESET)"
-	rm -f $(OBJ_SERVER) $(OBJ_CLIENT)
-	@if [ -d $(LIBFT_DIR) ]; then $(MAKE) -C $(LIBFT_DIR) clean 2>/dev/null || true; fi
+client_bonus: $(OBJS_CLIENT_BONUS) $(LIBFT)
+	$(CC) $(CFLAGS) -o client_bonus $(OBJS_CLIENT_BONUS) -L$(LIBFT_DIR) -lft
+
+server_bonus: $(OBJS_SERVER_BONUS) $(LIBFT)
+	$(CC) $(CFLAGS) -o server_bonus $(OBJS_SERVER_BONUS) -L$(LIBFT_DIR) -lft
+
+build_libft:
+	make -C $(LIBFT_DIR)
+clean: 
+	$(RM) $(OBJ_DIR)/*.o
+	$(MAKE) -C $(LIBFT_DIR) clean
 
 fclean: clean
-	@echo "$(RED)Full cleaning...$(RESET)"
-	rm -f $(SERVER) $(CLIENT)
-	@if [ -d $(LIBFT_DIR) ]; then $(MAKE) -C $(LIBFT_DIR) fclean 2>/dev/null || true; fi
+	$(RM) client server $(LIBFT)
+	$(MAKE) -C $(LIBFT_DIR) fclean
 
 re: fclean all
 
-.PHONY: all clean fclean re
-
+.PHONY: all clean fclean re client server bonus client_bonus server_bonus
+.SILENT:
