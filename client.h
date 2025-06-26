@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:43:58 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/26 00:05:05 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/26 12:57:26 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,10 @@
 
 typedef struct s_client
 {
-	pid_t	server_pid;
-	char	*message;
-	bool	await;
-	pid_t	client_pid;
+	pid_t		server_pid;
+	char		*message;
+	bool		await;
+	pid_t		client_pid;
 }				t_client;
-
-typedef struct sigaction	t_sigaction;
 
 #endif

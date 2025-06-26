@@ -6,20 +6,19 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:45:50 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/25 23:41:05 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/26 12:41:01 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.h"
 
-
 void	decode_msg(t_server *srv)
 {
-	char c;
+	char	c;
+
 	srv->await = true;
 	srv->bit_index = 0;
 	srv->byte_index = 0;
-
 	while (srv->await)
 	{
 		c = srv->buffer[srv->byte_index];
@@ -38,23 +37,22 @@ void	decode_msg(t_server *srv)
 	}
 }
 
-t_server *get_srv_instance(t_server *set)
+static void	wrap(t_server *srv, int *byte_index)
 {
-	static t_server *srv = NULL;
-	if (set)
-		srv = set;
-	return (srv);
+	*byte_index = 0;
+	ft_bzero(srv->buffer, BUFFER_SIZE);
 }
 
-void handle_signal(int signal, siginfo_t *info, void *context)
+void	handle_signal(int signal, siginfo_t *info, void *context)
 {
-	static unsigned char byte = 0;
-	static int bit_index = 0;
-	static int byte_index = 0;
-	t_server *srv = get_srv_instance(NULL);
+	static unsigned char	byte = 0;
+	static int				bit_index = 0;
+	static int				byte_index = 0;
+	t_server				*srv;
+
 	(void)context;
 	(void)info;
-
+	srv = get_srv_instance(NULL);
 	byte <<= 1;
 	if (signal == SIGUSR1)
 		byte |= 1;
@@ -65,24 +63,16 @@ void handle_signal(int signal, siginfo_t *info, void *context)
 		{
 			srv->buffer[byte_index++] = byte;
 			if (byte == '\0')
-			{
-				ft_printf("Received message: %s\n", srv->buffer);
-				byte_index = 0;
-				ft_bzero(srv->buffer, BUFFER_SIZE);
-			}
+				wrap(srv, &byte_index);
 		}
 		else
-		{
-			ft_printf("Buffer overflow, message too long\n");
-			byte_index = 0;
-			ft_bzero(srv->buffer, BUFFER_SIZE);
-		}
+			wrap(srv, &byte_index);
 		byte = 0;
 		bit_index = 0;
 	}
 }
 
-void init_server(t_server *srv)
+void	init_server(t_server *srv)
 {
 	ft_memset(srv, 0, sizeof(t_server));
 	srv->pid = getpid();
@@ -95,10 +85,10 @@ void init_server(t_server *srv)
 	}
 }
 
-int main(void)
+int	main(void)
 {
 	t_server	srv;
-	t_sigaction sa;
+	t_sigaction	sa;
 
 	init_server(&srv);
 	get_srv_instance(&srv);
@@ -115,7 +105,7 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 	srv.await = true;
-	while(srv.await)
+	while (srv.await)
 		pause();
 	return (0);
 }

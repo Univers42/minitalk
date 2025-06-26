@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:48:01 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/26 12:22:21 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/26 12:56:27 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,20 @@
 
 # include "libft.h"
 
-# define MSG_BUF_SIZE 5
+# define MSG_BUF_SIZE	5
+# define SEQ_BIT		8
+# define FIRST_FLUSH	1
+# define SECOND_FLUSH	2
 
 typedef struct s_server
 {
-	char *msg_buf;
-	size_t buf_cap;
-	size_t buf_i;
-	int bit_i;
-	unsigned char cur_byte;
-	pid_t last_client;
-}   t_server;
+	t_string		msg_buf;
+	t_size			buf_cap;
+	t_size			buf_i;
+	int				bit_i;
+	t_uint8			cur_byte;
+	pid_t			last_client;
+}					t_server;
 
 void		*ft_realloc(void *ptr, size_t old_size, size_t new_size);
 t_server	*get_server(void);

@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 20:08:31 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/25 23:40:47 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/26 13:00:19 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,12 @@
  * Each character of the message is sent using a series of signals,,
  * 
  */
-void send_message(t_client *client)
+void	send_message(t_client *client)
 {
-	char c;
-	int bit_index;
-	client->await = true;
+	char	c;
+	int		bit_index;
 
+	client->await = true;
 	while (client->await)
 	{
 		c = *client->message++;
@@ -30,15 +30,9 @@ void send_message(t_client *client)
 		while (bit_index--)
 		{
 			if (c & (1 << bit_index))
-			{
 				kill(client->server_pid, SIGUSR1);
-				ft_printf("Sent SIGUSR1(%d) for bit %d of character '%c'\n", SIGUSR1, bit_index, c);
-			}
 			else
-			{
 				kill(client->server_pid, SIGUSR2);
-				ft_printf("Sent SIGUSR2(%d) for bit %d of character '%c'\n", SIGUSR2, bit_index, c);
-			}
 			usleep(100);
 		}
 		if (c == '\0')
@@ -46,20 +40,14 @@ void send_message(t_client *client)
 	}
 }
 
-void handle_signal(int signal, siginfo_t *info, void *context)
+void	handle_signal(int signal, siginfo_t *info, void *context)
 {
 	(void)context;
 	(void)info;
-	// Process the received signal
 	if (signal == SIGUSR1)
-	{
-		
 		ft_printf("Signal SIGUSR1 received from PID %d\n", info->si_pid);
-	}
 	else if (signal == SIGUSR2)
-	{
 		ft_printf("Signal SIGUSR2 received from PID %d\n", info->si_pid);
-	}
 	printf("Received signal %d from PID %d\n", signal, info->si_pid);
 }
 
@@ -68,7 +56,7 @@ int	init_client(t_client *client, int argc, char **argv)
 	ft_memset(client, 0, sizeof(t_client));
 	if (argc < 3)
 		return (ft_printf("Usage: %s <server_pid> <message>\n", *argv), 1);
-	argv++; // Skip program name
+	argv++;
 	client->server_pid = ft_atoi(*argv++);
 	if (client->server_pid <= 0)
 		return (ft_printf("Invalid server PID: %s\n", *(argv - 1)), 1);
@@ -78,10 +66,10 @@ int	init_client(t_client *client, int argc, char **argv)
 	return (0);
 }
 
-int main(int argc, char **argv)
+int	main(int argc, char **argv)
 {
-	t_client client;
-	t_sigaction sa;
+	t_client	client;
+	t_sigaction	sa;
 
 	init_client(&client, argc, argv);
 	client.client_pid = getpid();

@@ -6,46 +6,67 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/26 12:03:12 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/26 12:03:40 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/26 14:16:24 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server_bonus.h"
+#include "client_bonus.h"
 
-void    clenaup_still_reachable(int sig)
+t_server	*get_server(void)
 {
-    t_server *srv = get_server();
+	static t_server	server;
 
-    if (srv->msg_buf)
-        free(srv->msg_buf);
-    ft_printf("Server exiting on signal %d\n", sig);
-    exit(0);
+	return (&server);
 }
 
-t_server *get_server(void)
+t_bclient	*get_client_instance(t_bclient *set)
 {
-    static t_server server;
-    return &server;
+	static t_bclient	*client;
+
+	if (set)
+		client = set;
+	return (client);
 }
 
-void *ft_realloc(void *ptr, size_t old_size, size_t new_size)
+int	initialize_client(t_bclient *client, int argc, char **argv)
 {
-    void *new_ptr;
-
-    if (new_size == 0)
-    {
-        free(ptr);
-        return NULL;
-    }
-    new_ptr = malloc(new_size);
-    if (!new_ptr)
-        return NULL;
-    if (ptr)
-    {
-        size_t copy_size = old_size < new_size ? old_size : new_size;
-        memcpy(new_ptr, ptr, copy_size);
-        free(ptr);
-    }
-    return new_ptr;
+	ft_memset(client, 0, sizeof(t_bclient));
+	if (argc != 3)
+		return (0);
+	client->legacy_client.server_pid = ft_atoi(argv[1]);
+	client->legacy_client.message = argv[2];
+	client->ack = 0;
+	return (1);
 }
 
+/**
+ * Send 8 bits of a character (LSB first)
+ */
+void	send_character_bits(t_bclient *client, unsigned char c)
+{
+	int	i;
+	int	bit;
+	int	pid;
+
+	pid = client->legacy_client.server_pid;
+	i = 0;
+	while (i < 8)
+	{
+		bit = (c >> i) & 1;
+		if (bit)
+			kill(pid, SIGUSR1);
+		else
+			kill(pid, SIGUSR2);
+		usleep(100);
+		handshake(client);
+		i++;
+	}
+}
+
+void	handshake(t_bclient *client)
+{
+	while (!client->ack)
+		usleep(100);
+	client->ack = 0;
+}

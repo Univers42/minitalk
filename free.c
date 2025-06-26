@@ -1,22 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   free.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/26 12:40:32 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/26 12:42:04 by dlesieur         ###   ########.fr       */
+/*   Created: 2025/06/26 13:42:19 by dlesieur          #+#    #+#             */
+/*   Updated: 2025/06/26 13:42:41 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "server.h"
+#include "server_bonus.h"
+#include "client_bonus.h"
 
-t_server	*get_srv_instance(t_server *set)
+void	clenaup_still_reachable(int sig)
 {
-	static t_server	*srv = NULL;
+	t_server	*srv;
 
-	if (set)
-		srv = set;
-	return (srv);
+	srv = get_server();
+	if (srv->msg_buf)
+		free(srv->msg_buf);
+	exit(0);
 }
