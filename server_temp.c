@@ -1,134 +1,175 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.c                                           :+:      :+:    :+:   */
+/*   server_temp.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:45:50 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/27 13:25:59 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/27 19:36:52 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.h"
-#include <signal.h>
-#include <unistd.h>
-#include <stdlib.h>
+#include "log.h"
 
-static void	reset_buffer(t_server *srv, int *byte_index)
+static t_client_state **get_clients(t_client_state **set)
 {
-	*byte_index = 0;
-	ft_bzero(srv->buffer, srv->buffer_size);
+	static t_client_state *clients = NULL;
+	if (set)
+		clients = *set;
+	return &clients;
 }
 
-static int	expand_buffer_if_needed(t_server *srv, int byte_index)
+static void reset_client_state(t_client_state *state)
 {
-	char	*new_buffer;
-	size_t	new_size;
+	state->byte = 0;
+	state->bit_index = 0;
+	state->byte_index = 0;
+	if (state->buffer)
+		memset(state->buffer, 0, state->buffer_size);
+}
 
-	if ((size_t)byte_index < srv->buffer_size - 1)
-		return (1);
-	
-	new_size = srv->buffer_size * 2;
-	new_buffer = ft_realloc(srv->buffer, srv->buffer_size, new_size);
+static int expand_client_buffer(t_client_state *state)
+{
+	size_t new_size = state->buffer_size * 2;
+	char *new_buffer = realloc(state->buffer, new_size);
 	if (!new_buffer)
-	{
-		ft_printf("Memory reallocation failed\n");
 		return (0);
-	}
-	srv->buffer = new_buffer;
-	srv->buffer_size = new_size;
-	ft_printf("Buffer expanded to %zu bytes\n", new_size);
+	state->buffer = new_buffer;
+	memset(state->buffer + state->buffer_size, 0, new_size - state->buffer_size);
+	state->buffer_size = new_size;
 	return (1);
 }
 
-static void	process_complete_byte(unsigned char byte, int *byte_index,
-		pid_t client_pid)
+static t_client_state *get_client_state(pid_t client_pid)
 {
-	t_server	*srv;
-
-	srv = get_srv_instance(NULL);
-	if (!srv)
-		return ;
-	
-	// Expand buffer if needed
-	if (!expand_buffer_if_needed(srv, *byte_index))
+	t_client_state **clients = get_clients(NULL);
+	t_client_state *curr = *clients;
+	while (curr)
 	{
-		ft_printf("Failed to expand buffer, message truncated\n");
-		kill(client_pid, SIGUSR2);
-		reset_buffer(srv, byte_index);
-		return ;
+		if (curr->client_pid == client_pid)
+			return curr;
+		curr = curr->next;
 	}
-	
-	srv->buffer[*byte_index] = byte;
-	(*byte_index)++;
-	
+	// Not found, create new
+	t_client_state *new = malloc(sizeof(t_client_state));
+	if (!new)
+		return NULL;
+	new->client_pid = client_pid;
+	new->byte = 0;
+	new->bit_index = 0;
+	new->byte_index = 0;
+	new->buffer_size = BUFFER_SIZE;
+	new->buffer = calloc(new->buffer_size, sizeof(char));
+	if (!new->buffer)
+	{
+		free(new);
+		return NULL;
+	}
+	new->next = *clients;
+	*clients = new;
+	return new;
+}
+
+static void free_all_clients(void)
+{
+	t_client_state **clients = get_clients(NULL);
+	t_client_state *curr = *clients;
+	while (curr)
+	{
+		t_client_state *next = curr->next;
+		if (curr->buffer)
+			free(curr->buffer);
+		free(curr);
+		curr = next;
+	}
+	*clients = NULL;
+}
+
+static void process_complete_byte(t_client_state *state, unsigned char byte, pid_t client_pid)
+{
+	// Expand buffer if needed
+	if ((size_t)state->byte_index >= state->buffer_size - 1)
+	{
+		if (!expand_client_buffer(state))
+		{
+			log_msg(LOG_ERROR, "Memory reallocation failed for client %d", client_pid);
+			kill(client_pid, SIGUSR2);
+			reset_client_state(state);
+			return;
+		}
+	}
+	state->buffer[state->byte_index] = byte;
+	state->byte_index++;
 	if (byte == '\0')
 	{
-		ft_printf("Received: %s\n", srv->buffer);
+		log_msg(LOG_SUCCESS, "Received message from PID %d: '%s'", client_pid, state->buffer);
 		kill(client_pid, SIGUSR1);
-		reset_buffer(srv, byte_index);
+		reset_client_state(state);
 	}
 }
 
-void	handle_signal(int signal, siginfo_t *info, void *context)
+// Adds a bit (0 or 1) to the byte at the given bit_index (0 to 7), using math
+static void add_bit_to_byte(unsigned char *byte, int bit_value, int bit_index)
 {
-	static unsigned char	byte = 0;
-	static int				bit_index = 0;
-	static int				byte_index = 0;
+	int multiplier = 1;
+	for (int i = 0; i < 7 - bit_index; ++i)
+		multiplier *= 2;
+	*byte += bit_value * multiplier;
+}
 
+void handle_signal(int signal, siginfo_t *info, void *context)
+{
+	pid_t client_pid = info->si_pid;
+	t_client_state *state = get_client_state(client_pid);
+	if (!state)
+	{
+		log_msg(LOG_ERROR, "Client PID %d not found", client_pid);
+		return;
+	}
+	int bit_value = (signal == SIGUSR1) ? 1 : 0;
+	log_msg(LOG_DEBUG, "Bit %d received from PID %d", bit_value, client_pid);
+	add_bit_to_byte(&(state->byte), bit_value, state->bit_index);
+	state->bit_index++;
+	if (state->bit_index == 8)
+	{
+		process_complete_byte(state, state->byte, client_pid);
+		state->byte = 0;
+		state->bit_index = 0;
+	}
+	kill(client_pid, SIGUSR1);
 	(void)context;
-	if (signal == SIGUSR1)
-		byte = (byte << 1) | 1;
-	else if (signal == SIGUSR2)
-		byte = byte << 1;
-	bit_index++;
-	if (bit_index == 8)
-	{
-		process_complete_byte(byte, &byte_index, info->si_pid);
-		byte = 0;
-		bit_index = 0;
-	}
 }
 
-void	init_server(t_server *srv)
+void init_server(void)
 {
-	ft_memset(srv, 0, sizeof(t_server));
-	srv->pid = getpid();
-	ft_printf("Server PID: %d\n", srv->pid);
-	srv->buffer_size = BUFFER_SIZE;
-	srv->buffer = ft_calloc(srv->buffer_size, sizeof(char));
-	if (!srv->buffer)
-	{
-		ft_printf("Memory allocation failed\n");
-		exit(EXIT_FAILURE);
-	}
-	srv->await = 1;
+	log_msg(LOG_INFO, "Server started on PID %d", getpid());
 }
 
-int	main(void)
+int main(void)
 {
-	t_server			srv;
-	struct sigaction	sa;
+	struct sigaction sa;
+	t_client_state *clients = NULL;
 
-	init_server(&srv);
-	get_srv_instance(&srv);
-	ft_memset(&sa, 0, sizeof(sa));
+	get_clients(&clients); // <-- Set the static pointer
+	init_server();
+	memset(&sa, 0, sizeof(sa));
 	sa.sa_sigaction = handle_signal;
 	sa.sa_flags = SA_SIGINFO;
 	if (sigaction(SIGUSR1, &sa, NULL) == -1)
 	{
-		ft_printf("Error setting up SIGUSR1 handler\n");
-		exit(EXIT_FAILURE);
+		log_msg(LOG_ERROR, "Error setting up SIGUSR1 handler");
+		return (1);
 	}
 	if (sigaction(SIGUSR2, &sa, NULL) == -1)
 	{
-		ft_printf("Error setting up SIGUSR2 handler\n");
-		exit(EXIT_FAILURE);
+		log_msg(LOG_ERROR, "Error setting up SIGUSR2 handler");
+		return (1);
 	}
-	ft_printf("Server ready, waiting for messages...\n");
-	while (srv.await)
+	log_msg(LOG_INFO, "Server ready, waiting for messages...");
+	while (1)
 		pause();
-	free(srv.buffer);
+	free_all_clients();
 	return (0);
 }

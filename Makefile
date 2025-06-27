@@ -6,13 +6,14 @@ CFLAGS=-Wall -Wextra -Werror -I. -I$(LIBFT_DIR) -D_GNU_SOURCE
 #CFLAGS+=-g ##Uncomment for debugging
 AR = ar rcs
 RM = rm -f
-SRCS = client.c server.c utils.c
-SRCS_BONUS=client_bonus.c server_bonus.c utils_bonus.c free.c
+SRCS = client_temp.c server_temp.c utils.c log.c
+SRCS_BONUS=client_bonus.c server_bonus.c utils_bonus.c free.c log.c
+# log.h is included in the project for all builds
 OBJ_DIR=objs
-OBJS_CLIENT=$(OBJ_DIR)/client.o $(OBJ_DIR)/utils.o
-OBJS_SERVER=$(OBJ_DIR)/server.o $(OBJ_DIR)/utils.o
-OBJS_CLIENT_BONUS=$(OBJ_DIR)/client_bonus.o $(OBJ_DIR)/utils_bonus.o $(OBJ_DIR)/free.o
-OBJS_SERVER_BONUS=$(OBJ_DIR)/server_bonus.o $(OBJ_DIR)/utils_bonus.o $(OBJ_DIR)/free.o
+OBJS_CLIENT=$(OBJ_DIR)/client_temp.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/log.o
+OBJS_SERVER=$(OBJ_DIR)/server_temp.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/log.o
+OBJS_CLIENT_BONUS=$(OBJ_DIR)/client_bonus.o $(OBJ_DIR)/utils_bonus.o $(OBJ_DIR)/free.o $(OBJ_DIR)/log.o
+OBJS_SERVER_BONUS=$(OBJ_DIR)/server_bonus.o $(OBJ_DIR)/utils_bonus.o $(OBJ_DIR)/free.o $(OBJ_DIR)/log.o
 LIBFT_DIR=libft
 LIBFT=$(LIBFT_DIR)/libft.a
 
