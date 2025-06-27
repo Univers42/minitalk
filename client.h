@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:43:58 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/26 12:57:26 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/27 12:12:01 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,5 +23,9 @@ typedef struct s_client
 	bool		await;
 	pid_t		client_pid;
 }				t_client;
+
+void	send_message(t_client *client);
+void	handle_signal(int signal, siginfo_t *info, void *context);
+int		init_client(t_client *client, int argc, char **argv);
 
 #endif

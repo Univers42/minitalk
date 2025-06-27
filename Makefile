@@ -1,6 +1,6 @@
 NAME=minitalk.a
 PROG=client server
-PROG_BONUS=client_bonus server_bonus
+PROG_BONUS=client server
 CC=cc
 CFLAGS=-Wall -Wextra -Werror -I. -I$(LIBFT_DIR) -D_GNU_SOURCE
 #CFLAGS+=-g ##Uncomment for debugging
@@ -11,8 +11,8 @@ SRCS_BONUS=client_bonus.c server_bonus.c utils_bonus.c free.c
 OBJ_DIR=objs
 OBJS_CLIENT=$(OBJ_DIR)/client.o $(OBJ_DIR)/utils.o
 OBJS_SERVER=$(OBJ_DIR)/server.o $(OBJ_DIR)/utils.o
-OBJS_CLIENT_BONUS=$(OBJ_DIR)/client_bonus.o $(OBJ_DIR)/utils_bonus.o
-OBJS_SERVER_BONUS=$(OBJ_DIR)/server_bonus.o $(OBJ_DIR)/utils_bonus.o
+OBJS_CLIENT_BONUS=$(OBJ_DIR)/client_bonus.o $(OBJ_DIR)/utils_bonus.o $(OBJ_DIR)/free.o
+OBJS_SERVER_BONUS=$(OBJ_DIR)/server_bonus.o $(OBJ_DIR)/utils_bonus.o $(OBJ_DIR)/free.o
 LIBFT_DIR=libft
 LIBFT=$(LIBFT_DIR)/libft.a
 
@@ -32,13 +32,13 @@ $(OBJ_DIR)/%.o: %.c
 $(LIBFT):
 	$(MAKE) -C $(LIBFT_DIR)
 
-bonus: client_bonus server_bonus
+bonus: bonus_client bonus_server
 
-client_bonus: $(OBJS_CLIENT_BONUS) $(LIBFT)
-	$(CC) $(CFLAGS) -o client_bonus $(OBJS_CLIENT_BONUS) -L$(LIBFT_DIR) -lft
+bonus_client: $(OBJS_CLIENT_BONUS) $(LIBFT)
+	$(CC) $(CFLAGS) -o client $(OBJS_CLIENT_BONUS) -L$(LIBFT_DIR) -lft
 
-server_bonus: $(OBJS_SERVER_BONUS) $(LIBFT)
-	$(CC) $(CFLAGS) -o server_bonus $(OBJS_SERVER_BONUS) -L$(LIBFT_DIR) -lft
+bonus_server: $(OBJS_SERVER_BONUS) $(LIBFT)
+	$(CC) $(CFLAGS) -o server $(OBJS_SERVER_BONUS) -L$(LIBFT_DIR) -lft
 
 build_libft:
 	make -C $(LIBFT_DIR)
@@ -52,5 +52,5 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re client server bonus client_bonus server_bonus
+.PHONY: all clean fclean re client server bonus bonus_client bonus_server build_libft
 .SILENT:

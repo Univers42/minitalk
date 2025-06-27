@@ -6,17 +6,18 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/26 13:42:19 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/26 13:42:41 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/27 00:13:23 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server_bonus.h"
 #include "client_bonus.h"
 
-void	clenaup_still_reachable(int sig)
+void	cleanup_still_reachable(int sig)
 {
 	t_server	*srv;
 
+	(void)sig;
 	srv = get_server();
 	if (srv->msg_buf)
 		free(srv->msg_buf);

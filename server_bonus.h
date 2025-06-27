@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:48:01 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/26 12:56:27 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/27 00:13:31 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,7 @@ typedef struct s_server
 	pid_t			last_client;
 }					t_server;
 
-void		*ft_realloc(void *ptr, size_t old_size, size_t new_size);
 t_server	*get_server(void);
-void		clenaup_still_reachable(int sig);
+void		cleanup_still_reachable(int sig);
 
 #endif
