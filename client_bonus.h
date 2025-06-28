@@ -5,29 +5,31 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/27 20:42:02 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/27 20:47:24 by dlesieur         ###   ########.fr       */
+/*   Created: 2025/06/28 01:33:21 by dlesieur          #+#    #+#             */
+/*   Updated: 2025/06/28 01:33:51 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CLIENT_BONUS_H
 # define CLIENT_BONUS_H
+
 # include "client.h"
 
 typedef t_client	t_legacy;
 
 typedef struct s_bclient
 {
-	t_legacy		legacy_client;
-	int				batch_size;
-	int				ack_received;
-	int				timeout;
-	t_atomic_flag	ack;
-}					t_bclient;
+	t_legacy				legacy_client;
+	int						batch_size;
+	int						ack_received;
+	int						timeout;
+	volatile sig_atomic_t	ack; /* Made atomic for signal safety */
+}							t_bclient;
 
-t_bclient		*get_client_instance(t_bclient *set);
-int				initialize_client(t_bclient *client, int argc, char **argv);
-void			send_character_bits(t_bclient *client, unsigned char c);
-void			send_message_bonus(t_bclient *client);
+/* Function prototypes */
+t_bclient	*get_client_instance(t_bclient *set);
+int			initialize_client(t_bclient *client, int argc, char **argv);
+int			send_character_bits(t_bclient *client, unsigned char c);
+void		send_message_bonus(t_bclient *client);
 
 #endif

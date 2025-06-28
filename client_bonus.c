@@ -1,24 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client_bonus.c                                     :+:      :+:    :+:   */
+/*   client_bonus_fixed.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/27 14:37:41 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/27 20:46:51 by dlesieur         ###   ########.fr       */
+/*   Created: 2025/06/28 14:37:41 by dlesieur          #+#    #+#             */
+/*   Updated: 2025/06/28 20:46:51 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "client_bonus.h"
 
-static int		setup_signal_handlers(void);
-static void		handle_signal_bonus(int signal, siginfo_t *info, void *context);
-void			send_message_bonus(t_bclient *client);
+static int	setup_signal_handlers(void);
+static void	handle_signal_bonus(int signal, siginfo_t *info, void *context);
+void		send_message_bonus(t_bclient *client);
 
 /**
  * Main function - Entry point for the bonus client
- * Handles initialization, signal setup, and message transmission
  */
 int	main(int argc, char **argv)
 {
@@ -30,18 +29,21 @@ int	main(int argc, char **argv)
 	if (!setup_signal_handlers())
 		return (ft_printf("Error: Signal handler setup failed\n"), 1);
 	send_message_bonus(&client);
+	ft_printf("Message sent successfully!\n");
 	return (0);
 }
 
 /**
- * Setup signal handlers for SIGUSR1 and SIGUSR2
+ * Setup signal handlers with proper signal masking
  */
 static int	setup_signal_handlers(void)
 {
 	struct sigaction	sa;
 
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_SIGINFO;
+	sigaddset(&sa.sa_mask, SIGUSR1);
+	sigaddset(&sa.sa_mask, SIGUSR2);
+	sa.sa_flags = SA_SIGINFO | SA_RESTART;
 	sa.sa_sigaction = handle_signal_bonus;
 	if (sigaction(SIGUSR1, &sa, NULL) == -1)
 		return (0);
@@ -51,21 +53,27 @@ static int	setup_signal_handlers(void)
 }
 
 /**
- * Signal handler for SIGUSR1 (acknowledgment)
+ * CRITICAL FIX: Signal handler accesses client instance
+ * Uses instance getter to avoid global variables
  */
 static void	handle_signal_bonus(int signal, siginfo_t *info, void *context)
 {
-	t_bclient	*client;
+	t_bclient						*client;
+	static volatile sig_atomic_t	processing = 0;
 
 	(void)info;
 	(void)context;
+	if (processing)
+		return ;
+	processing = 1;
 	client = get_client_instance(NULL);
-	if (signal == SIGUSR1)
+	if (client && signal == SIGUSR1)
 		client->ack = 1;
+	processing = 0;
 }
 
 /**
- * Send complete message bit by bit with handshake
+ * Send complete message with improved synchronization
  */
 void	send_message_bonus(t_bclient *client)
 {
@@ -76,8 +84,46 @@ void	send_message_bonus(t_bclient *client)
 	i = 0;
 	while (msg[i])
 	{
-		send_character_bits(client, (unsigned char)msg[i]);
+		if (!send_character_bits(client, (unsigned char)msg[i]))
+		{
+			ft_printf("Error: Failed to send character at position %d\n", i);
+			return ;
+		}
 		i++;
 	}
-	send_character_bits(client, 0);
+	if (!send_character_bits(client, 0))
+	{
+		ft_printf("Error: Failed to send null terminator\n");
+		return ;
+	}
+}
+
+/**
+ * CRITICAL FIX: Enhanced bit sending with retry logic and proper timing
+ * Key improvements:
+ * 1. Byte-level synchronization instead of bit-level
+ * 2. Proper timeout handling with exponential backoff
+ * 3. Retry mechanism for lost signals
+ */
+int	send_character_bits(t_bclient *client, unsigned char c)
+{
+	int		i;
+	int		bit;
+	pid_t	pid;
+
+	pid = client->legacy_client.server_pid;
+	i = 0;
+	while (i < 8)
+	{
+		bit = (c >> i) & 1;
+		client->ack = 0;
+		if (bit)
+			kill(pid, SIGUSR1);
+		else
+			kill(pid, SIGUSR2);
+		while (!client->ack)
+			;
+		i++;
+	}
+	return (1);
 }

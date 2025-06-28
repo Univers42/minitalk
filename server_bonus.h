@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server_bonus.h                                     :+:      :+:    :+:   */
+/*   server_bonus_fixed.h                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/25 19:48:01 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/27 00:13:31 by dlesieur         ###   ########.fr       */
+/*   Created: 2025/06/28 19:48:01 by dlesieur          #+#    #+#             */
+/*   Updated: 2025/06/28 00:13:31 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 # define SERVER_BONUS_H
 
 # include "libft.h"
+# include <signal.h>
+# include <sys/types.h>
 
 # define MSG_BUF_SIZE	5
 # define SEQ_BIT		8
@@ -30,6 +32,7 @@ typedef struct s_server
 	pid_t			last_client;
 }					t_server;
 
+/* Function prototypes */
 t_server	*get_server(void);
 void		cleanup_still_reachable(int sig);
 

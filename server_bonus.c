@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server_bonus.c                                     :+:      :+:    :+:   */
+/*   server_bonus_fixed.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/25 19:47:04 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/27 23:37:41 by dlesieur         ###   ########.fr       */
+/*   Created: 2025/06/28 19:47:04 by dlesieur          #+#    #+#             */
+/*   Updated: 2025/06/28 19:51:07 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,9 @@ int	main(void)
 	srv = get_server();
 	memset(srv, 0, sizeof(t_server));
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_SIGINFO;
+	sigaddset(&sa.sa_mask, SIGUSR1);
+	sigaddset(&sa.sa_mask, SIGUSR2);
+	sa.sa_flags = SA_SIGINFO | SA_NODEFER;
 	sa.sa_sigaction = handle_sig;
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);
@@ -38,14 +40,14 @@ int	main(void)
 	return (0);
 }
 
-static void	flush(t_server *srv, siginfo_t *info, int wrap_flag)
+static void	flush(t_server *srv, pid_t client_pid, int wrap_flag)
 {
 	if (wrap_flag == 1)
 	{
 		srv->buf_i = 0;
 		srv->bit_i = 0;
 		srv->cur_byte = 0;
-		srv->last_client = info->si_pid;
+		srv->last_client = client_pid;
 	}
 	if (wrap_flag == 2)
 	{
@@ -55,7 +57,7 @@ static void	flush(t_server *srv, siginfo_t *info, int wrap_flag)
 	}
 }
 
-static void	grow_buffer(t_server *srv, siginfo_t *info)
+static void	grow_buffer(t_server *srv, pid_t client_pid)
 {
 	char	*new_buf;
 
@@ -63,48 +65,57 @@ static void	grow_buffer(t_server *srv, siginfo_t *info)
 	{
 		new_buf = ft_realloc(srv->msg_buf, srv->buf_cap, srv->buf_cap * 2);
 		if (!new_buf)
-		{
-			flush(srv, info, SECOND_FLUSH);
-			return ;
-		}
+			return (flush(srv, client_pid, SECOND_FLUSH));
 		srv->msg_buf = new_buf;
 		srv->buf_cap *= 2;
 	}
 	srv->msg_buf[srv->buf_i++] = srv->cur_byte;
 	if (srv->cur_byte == '\0')
-		(ft_printf("Received: %s\n", srv->msg_buf),
-			flush(srv, info, SECOND_FLUSH));
+	{
+		ft_printf("Received: %s\n", srv->msg_buf);
+		flush(srv, client_pid, SECOND_FLUSH);
+	}
 	srv->cur_byte = 0;
 	srv->bit_i = 0;
-	kill(info->si_pid, SIGUSR1);
+	kill(client_pid, SIGUSR1);
 }
 
-/**
- * CRITICAL FIX: Signal handler race condition resolved
- * The main issue was sending ACK for every bit instead of every complete byte
- */
-static void	handle_sig(int sig, siginfo_t *info, void *context)
+static int	initialize_server_buffer(t_server *srv)
 {
-	t_server	*srv;
-
-	(void)context;
-	srv = get_server();
 	if (!srv->msg_buf)
 	{
 		srv->buf_cap = MSG_BUF_SIZE;
 		srv->msg_buf = malloc(srv->buf_cap);
 		if (srv->msg_buf)
-			memset(srv->msg_buf, 0, srv->buf_cap);
+			ft_memset(srv->msg_buf, 0, srv->buf_cap);
 		if (!srv->msg_buf)
-			return ;
+			return (0);
+	}
+	return (1);
+}
+
+static void	handle_sig(int sig, siginfo_t *info, void *context)
+{
+	static volatile sig_atomic_t	processing = 0;
+	t_server						*srv;
+
+	(void)context;
+	if (processing)
+		return ;
+	processing = 1;
+	srv = get_server();
+	if (!initialize_server_buffer(srv))
+	{
+		processing = 0;
+		return ;
 	}
 	if (srv->last_client != info->si_pid)
-		flush(srv, info, FIRST_FLUSH);
+		flush(srv, info->si_pid, FIRST_FLUSH);
 	if (sig == SIGUSR1)
 		srv->cur_byte |= (1 << srv->bit_i);
 	srv->bit_i++;
 	if (srv->bit_i == SEQ_BIT)
-		grow_buffer(srv, info);
-	else
-		kill(info->si_pid, SIGUSR1);
+		grow_buffer(srv, info->si_pid);
+	kill(info->si_pid, SIGUSR1);
+	processing = 0;
 }

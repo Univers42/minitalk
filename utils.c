@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/26 12:40:32 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/28 00:31:33 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/28 00:43:10 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,10 @@
 #include "client.h"
 #include <errno.h>
 
+/**
+ * need to distinguish between client and server because the data
+ * will be stored and different, accross calls.
+ */
 t_client	*get_instance(t_client *set)
 {
 	static t_client	*client = NULL;

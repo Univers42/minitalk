@@ -40,36 +40,3 @@ int	initialize_client(t_bclient *client, int argc, char **argv)
 	client->timeout = 0;
 	return (1);
 }
-
-/**
- * Send 8 bits of a character (LSB first) with proper synchronization
- * FIXED: Proper handshake timing and timeout handling
- */
-void	send_character_bits(t_bclient *client, unsigned char c)
-{
-	int	i;
-	int	bit;
-	int	pid;
-	int	timeout_counter;
-
-	pid = client->legacy_client.server_pid;
-	i = -1;
-	while (++i < 8)
-	{
-		bit = (c >> i) & 1;
-		client->ack = 0;
-		if (bit)
-			kill(pid, SIGUSR1);
-		else
-			kill(pid, SIGUSR2);
-		timeout_counter = 0;
-		while (!client->ack && timeout_counter < 10000)
-		{
-			usleep(10);
-			timeout_counter++;
-		}
-		if (timeout_counter >= 10000)
-			return (log_msg(LOG_ERROR,
-					"Timeout waiting for ACK from server (PID: %d)", pid));
-	}
-}
