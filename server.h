@@ -6,31 +6,39 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:45:50 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/27 19:30:40 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/28 00:25:32 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_H
-#define SERVER_H
+# define SERVER_H
 
-#include "libft/libft.h"
-#include <sys/types.h>
-#include <signal.h>
-#include "log.h"
-#define BUFFER_SIZE 1024
+# include "libft/libft.h"
+# include <sys/types.h>
+# include <signal.h>
+# include "log.h"
+# define BUFFER_SIZE 1024
 
 typedef struct s_client_state
 {
-	pid_t client_pid;
-	unsigned char byte;
-	int bit_index;
-	int byte_index;
-	char *buffer;
-	size_t buffer_size;
-	struct s_client_state *next;
-} t_client_state;
+	pid_t					client_pid;
+	unsigned char			byte;
+	int						bit_index;
+	int						byte_index;
+	char					*buffer;
+	size_t					buffer_size;
+	struct s_client_state	*next;
+}							t_client_state;
 
-void handle_signal(int signal, siginfo_t *info, void *context);
-void init_server(void);
-
+t_client_state	**get_clients(t_client_state **set);
+t_client_state	*get_client_state(pid_t client_pid);
+void			handle_signal(int signal, siginfo_t *info, void *context);
+void			free_all_clients(void);
+int				expand_client_buffer(t_client_state *state);
+char			get_printable_char(unsigned char byte);
+void			handle_message_completion(t_client_state *state,
+					pid_t client_pid);
+int				handle_buffer_expansion(t_client_state *state,
+					pid_t client_pid);
+void			reset_client_state(t_client_state *state);
 #endif

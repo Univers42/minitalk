@@ -13,83 +13,63 @@
 #include "server_bonus.h"
 #include "client_bonus.h"
 
-t_server *get_server(void)
+t_server	*get_server(void)
 {
-    static t_server server;
-    return (&server);
+	static t_server	server;
+
+	return (&server);
 }
 
-t_bclient *get_client_instance(t_bclient *set)
+t_bclient	*get_client_instance(t_bclient *set)
 {
-    static t_bclient *client;
-    
-    if (set)
-        client = set;
-    return (client);
+	static t_bclient	*client;
+
+	if (set)
+		client = set;
+	return (client);
 }
 
-int initialize_client(t_bclient *client, int argc, char **argv)
+int	initialize_client(t_bclient *client, int argc, char **argv)
 {
-    ft_memset(client, 0, sizeof(t_bclient));
-    
-    if (argc != 3)
-        return (0);
-    
-    client->legacy_client.server_pid = ft_atoi(argv[1]);
-    client->legacy_client.message = argv[2];
-    client->ack = 0;
-    client->timeout = 0;
-    
-    return (1);
+	ft_memset(client, 0, sizeof(t_bclient));
+	if (argc != 3)
+		return (0);
+	client->legacy_client.server_pid = ft_atoi(argv[1]);
+	client->legacy_client.message = argv[2];
+	client->ack = 0;
+	client->timeout = 0;
+	return (1);
 }
 
 /**
  * Send 8 bits of a character (LSB first) with proper synchronization
  * FIXED: Proper handshake timing and timeout handling
  */
-void send_character_bits(t_bclient *client, unsigned char c)
+void	send_character_bits(t_bclient *client, unsigned char c)
 {
-    int i;
-    int bit;
-    int pid;
-    int timeout_counter;
-    
-    pid = client->legacy_client.server_pid;
-    i = 0;
-    
-    while (i < 8)
-    {
-        bit = (c >> i) & 1;
-        
-        // Reset acknowledgment flag BEFORE sending signal
-        client->ack = 0;
-        
-        // Send the bit
-        if (bit)
-            kill(pid, SIGUSR1);
-        else
-            kill(pid, SIGUSR2);
-        
-        // Wait for acknowledgment with timeout
-        timeout_counter = 0;
-        while (!client->ack && timeout_counter < 10000)
-        {
-            usleep(10);  // 10 microseconds
-            timeout_counter++;
-        }
-        
-        // If timeout occurred, retry the bit
-        if (timeout_counter >= 10000)
-        {
-            // Optional: log timeout or handle error
-            // For now, continue (server might have received it)
-        }
-        
-        i++;
-    }
-}
+	int	i;
+	int	bit;
+	int	pid;
+	int	timeout_counter;
 
-/**
- * REMOVED: Old handshake function was redundant and causing issues
- * The handshake is now integrated directly into send_character_bits
- */
+	pid = client->legacy_client.server_pid;
+	i = -1;
+	while (++i < 8)
+	{
+		bit = (c >> i) & 1;
+		client->ack = 0;
+		if (bit)
+			kill(pid, SIGUSR1);
+		else
+			kill(pid, SIGUSR2);
+		timeout_counter = 0;
+		while (!client->ack && timeout_counter < 10000)
+		{
+			usleep(10);
+			timeout_counter++;
+		}
+		if (timeout_counter >= 10000)
+			return (log_msg(LOG_ERROR,
+					"Timeout waiting for ACK from server (PID: %d)", pid));
+	}
+}
