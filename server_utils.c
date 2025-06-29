@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 00:00:32 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/28 00:32:02 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/29 23:01:59 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ t_client_state	*get_client_state(pid_t client_pid)
 	ft_memset(new, 0, sizeof(t_client_state));
 	new->client_pid = client_pid;
 	new->buffer_size = BUFFER_SIZE;
-	new->buffer = calloc(new->buffer_size, sizeof(char));
+	new->buffer = ft_calloc(new->buffer_size, sizeof(char));
 	if (!new->buffer)
 		return (free(new), NULL);
 	new->next = *clients;
@@ -70,8 +70,8 @@ t_client_state	*get_client_state(pid_t client_pid)
 
 int	expand_client_buffer(t_client_state *state)
 {
-	size_t	new_size;
-	char	*new_buffer;
+	t_string	new_buffer;
+	size_t		new_size;
 
 	new_size = state->buffer_size * 2;
 	new_buffer = realloc(state->buffer, new_size);
@@ -84,7 +84,7 @@ int	expand_client_buffer(t_client_state *state)
 	return (1);
 }
 
-char	get_printable_char(unsigned char byte)
+char	get_printable_char(t_uint8 byte)
 {
 	if (ft_isprint(byte))
 		return (byte);

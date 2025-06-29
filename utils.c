@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/26 12:40:32 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/28 00:43:10 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/29 23:07:41 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ int	get_bit_from_char(char c, int bit_index)
 	return ((value / divisor) % 2);
 }
 
-void	get_signal_info(int bit_value, int *sig, char **sig_name)
+void	get_signal_info(int bit_value, t_array sig, t_strings sig_name)
 {
 	if (bit_value)
 	{
@@ -66,10 +66,10 @@ char	get_display_char(char c)
 
 void	send_bit(t_client *client, char c, int bit)
 {
-	char	*sig_name;
-	char	display_char;
-	int		bit_value;
-	int		sig;
+	t_string	sig_name;
+	char		display_char;
+	int			bit_value;
+	int			sig;
 
 	client->ack = 0;
 	bit_value = get_bit_from_char(c, bit);
@@ -86,5 +86,5 @@ void	send_bit(t_client *client, char c, int bit)
 		exit(1);
 	}
 	while (!client->ack)
-		;
+		usleep(100);
 }

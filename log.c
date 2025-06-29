@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 18:53:54 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/27 23:32:18 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/29 23:12:06 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,13 @@
 
 #include "log.h"
 
-static void	buffer_append(char *buffer, int *pos, const char *str)
+static void	buffer_append(t_string buffer, int *pos, const char *str)
 {
 	while (*str && *pos < 1023)
 		buffer[(*pos)++] = *str++;
 }
 
-static inline void	buffer_append_number(char *buffer, int *pos, int num)
+static inline void	buffer_append_number(t_string buffer, int *pos, int num)
 {
 	char	temp[12];
 	int		i;
@@ -52,7 +52,7 @@ static inline void	buffer_append_number(char *buffer, int *pos, int num)
 		buffer[(*pos)++] = temp[--i];
 }
 
-static inline void	put_level_buffered(char *buffer, int *pos,
+static inline void	put_level_buffered(t_string buffer, int *pos,
 										t_log_level level)
 {
 	if (level == LOG_INFO)
@@ -69,7 +69,7 @@ static inline void	put_level_buffered(char *buffer, int *pos,
 		buffer_append(buffer, pos, "[UNKNOWN] ");
 }
 
-static void	vlog_msg(const char *fmt, va_list args, char *buffer, int *pos)
+static void	vlog_msg(const char *fmt, va_list args, t_string buffer, int *pos)
 {
 	int	i;
 
@@ -99,10 +99,10 @@ static void	vlog_msg(const char *fmt, va_list args, char *buffer, int *pos)
 // Only supports %s and %d, everything else is printed as-is
 void	log_msg(t_log_level level, const char *fmt, ...)
 {
-	char	buffer[1024];
-	va_list	args;
-	int		enabled;
-	int		pos;
+	char		buffer[1024];
+	va_list		args;
+	t_flag		enabled;
+	int			pos;
 
 	pos = 0;
 	enabled = MINITALK_DEBUG;

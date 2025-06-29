@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:45:50 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/28 00:24:37 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/29 23:48:09 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@ void	reset_client_state(t_client_state *state)
 	state->bit_index = 0;
 	state->byte_index = 0;
 	if (state->buffer)
-		memset(state->buffer, 0, state->buffer_size);
+		ft_memset(state->buffer, 0, state->buffer_size);
 }
 
 static void	process_complete_byte(t_client_state *state,
-	unsigned char byte, pid_t client_pid)
+	t_uint8 byte, pid_t client_pid)
 {
 	char	display_char;
 
@@ -39,7 +39,7 @@ static void	process_complete_byte(t_client_state *state,
 }
 
 // Adds a bit (0 or 1) to the byte at the given bit_index (0 to 7), using math
-static void	add_bit_to_byte(unsigned char *byte, int bit_value, int bit_index)
+static void	add_bit_to_byte(t_uint8 *byte, int bit_value, int bit_index)
 {
 	int	multiplier;
 	int	i;
@@ -82,7 +82,7 @@ void	handle_signal(int signal, siginfo_t *info, void *context)
 int	main(void)
 {
 	t_client_state		*clients;
-	struct sigaction	sa;
+	t_sigaction			sa;
 
 	clients = NULL;
 	get_clients(&clients);

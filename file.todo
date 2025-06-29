@@ -1,0 +1,39 @@
+[x]write the file in C
+[x]teh project has to follow the norm , if archived or functions additional, they have to comply the norminette otherwise 0
+[x]segafault, bus erro, double, etc..excepti teh undefined behavior
+[]all the memory assigned into the heap have to be freed when necessary don't allow leaks of memrory
+[]flag -WWW and use `cc` , no relink
+[] $(NAME) , all, clean, fclean, re, bonus
+[] client and server program
+[] libft
+[] segault, bus error, double free, etc.
+[]  no forbideen functions
+[] the server will run first and whow the PID
+[] ./client <pid> <message>
+[] Teh string has to communicate teh string passig the 
+[] The server has to be able to receive strings from distinct client without reinitiate
+[] the communication between the server and only using UNIX signals 
+[]we only can  using two signals SIGUSR1 and SIGUSR2
+[] the communication has to be less than 1 sec for a message of 100 bytes
+[] The server confirm each signal received to the client
+[] Support Unicode characters
+
+
+[x]norminette 
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]

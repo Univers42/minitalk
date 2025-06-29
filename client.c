@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:45:50 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/27 23:15:13 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/29 23:08:51 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ void	send_message(t_client *client)
 	send_char(client, '\0');
 }
 
-int	init_client(t_client *client, int argc, char **argv)
+int	init_client(t_client *client, int argc, t_strings argv)
 {
 	ft_memset(client, 0, sizeof(t_client));
 	if (argc != 3)
@@ -60,7 +60,7 @@ int	init_client(t_client *client, int argc, char **argv)
 
 int	main(int argc, char **argv)
 {
-	struct sigaction	sa;
+	t_sigaction			sa;
 	t_client			client;
 
 	if (init_client(&client, argc, argv) != 0)

@@ -17,12 +17,12 @@ static void	handle_sig(int sig, siginfo_t *info, void *context);
 int	main(void)
 {
 	t_server			*srv;
-	struct sigaction	sa;
-	struct sigaction	sa_cleanup;
+	t_sigaction			sa;
+	t_sigaction			sa_cleanup;
 
 	ft_printf("Server bonus is running...\nPID: %d\n", getpid());
 	srv = get_server();
-	memset(srv, 0, sizeof(t_server));
+	ft_memset(srv, 0, sizeof(t_server));
 	sigemptyset(&sa.sa_mask);
 	sigaddset(&sa.sa_mask, SIGUSR1);
 	sigaddset(&sa.sa_mask, SIGUSR2);
@@ -59,7 +59,7 @@ static void	flush(t_server *srv, pid_t client_pid, int wrap_flag)
 
 static void	grow_buffer(t_server *srv, pid_t client_pid)
 {
-	char	*new_buf;
+	t_string	new_buf;
 
 	if (srv->buf_i + 2 > srv->buf_cap)
 	{
@@ -96,8 +96,8 @@ static int	initialize_server_buffer(t_server *srv)
 
 static void	handle_sig(int sig, siginfo_t *info, void *context)
 {
-	static volatile sig_atomic_t	processing = 0;
-	t_server						*srv;
+	static t_sig_atomic	processing = 0;
+	t_server			*srv;
 
 	(void)context;
 	if (processing)

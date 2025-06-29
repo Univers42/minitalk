@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:45:50 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/28 00:25:32 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/29 23:01:49 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,10 @@
 typedef struct s_client_state
 {
 	pid_t					client_pid;
-	unsigned char			byte;
+	t_uint8					byte;
 	int						bit_index;
 	int						byte_index;
-	char					*buffer;
+	t_string				buffer;
 	size_t					buffer_size;
 	struct s_client_state	*next;
 }							t_client_state;
@@ -35,7 +35,7 @@ t_client_state	*get_client_state(pid_t client_pid);
 void			handle_signal(int signal, siginfo_t *info, void *context);
 void			free_all_clients(void);
 int				expand_client_buffer(t_client_state *state);
-char			get_printable_char(unsigned char byte);
+char			get_printable_char(t_uint8 byte);
 void			handle_message_completion(t_client_state *state,
 					pid_t client_pid);
 int				handle_buffer_expansion(t_client_state *state,

@@ -38,7 +38,7 @@ int	main(int argc, char **argv)
  */
 static int	setup_signal_handlers(void)
 {
-	struct sigaction	sa;
+	t_sigaction	sa;
 
 	sigemptyset(&sa.sa_mask);
 	sigaddset(&sa.sa_mask, SIGUSR1);
@@ -58,8 +58,8 @@ static int	setup_signal_handlers(void)
  */
 static void	handle_signal_bonus(int signal, siginfo_t *info, void *context)
 {
-	t_bclient						*client;
-	static volatile sig_atomic_t	processing = 0;
+	static t_sig_atomic	processing = 0;
+	t_bclient			*client;
 
 	(void)info;
 	(void)context;
@@ -77,8 +77,8 @@ static void	handle_signal_bonus(int signal, siginfo_t *info, void *context)
  */
 void	send_message_bonus(t_bclient *client)
 {
-	char	*msg;
-	int		i;
+	t_string	msg;
+	int			i;
 
 	msg = client->legacy_client.message;
 	i = 0;
@@ -105,7 +105,7 @@ void	send_message_bonus(t_bclient *client)
  * 2. Proper timeout handling with exponential backoff
  * 3. Retry mechanism for lost signals
  */
-int	send_character_bits(t_bclient *client, unsigned char c)
+int	send_character_bits(t_bclient *client, t_uint8 c)
 {
 	int		i;
 	int		bit;
@@ -122,7 +122,7 @@ int	send_character_bits(t_bclient *client, unsigned char c)
 		else
 			kill(pid, SIGUSR2);
 		while (!client->ack)
-			;
+			usleep(2000);
 		i++;
 	}
 	return (1);
