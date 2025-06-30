@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 19:32:46 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/30 19:35:20 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/30 19:59:43 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 	Instead of calling spagetti code ft ft_printf, let's recode logs function
 	that give more send to a debug maintainability in both client and server.
  */
-# include "log.h"
+# include "minitalk.h"
 
 static void	buffer_append(t_string buffer, int *pos, const char *str)
 {

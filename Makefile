@@ -6,7 +6,7 @@
 #    By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/30 17:17:44 by dlesieur          #+#    #+#              #
-#    Updated: 2025/06/30 19:51:49 by dlesieur         ###   ########.fr        #
+#    Updated: 2025/06/30 19:59:18 by dlesieur         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,6 +37,7 @@ INCLUDES := minitalk.h $(LIBFT_DIR)/libft.h
 INCLUDE_FLAGS := -I. -I$(LIBFT_DIR)
 
 # Source files
+UTILS := logs.c
 SRCS := $(MANDATORY_DIR)/client.c \
 	$(MANDATORY_DIR)/server.c \
 	$(MANDATORY_DIR)/utils.c \
@@ -47,7 +48,6 @@ SRCS_BONUS := $(BONUS_DIR)/client_bonus.c \
 	$(BONUS_DIR)/utils_bonus.c \
 	$(UTILS)
 
-UTILS := logs.c
 # Object files
 OBJS := $(SRCS:.c=.o)
 OBJS_BONUS := $(SRCS_BONUS:.c=.o)
