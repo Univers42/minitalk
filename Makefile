@@ -6,73 +6,79 @@
 #    By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/30 17:17:44 by dlesieur          #+#    #+#              #
-#    Updated: 2025/06/30 17:55:28 by dlesieur         ###   ########.fr        #
+#    Updated: 2025/06/30 18:08:47 by dlesieur         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-#=======================================#
-#SETTABLES								#
-#=======================================#
-# Project
-PROG_NAME= server client
-PROJECT_DIR=.
+# Project info
+PROG_NAME = server client
+PROJECT_DIR = .
+CC = cc
+CFLAGS = -Wall -Wextra -Werror
 
 # Directories
-DIR_MANDATORY=$(PROJECT_DIR)/mandatory
-DIR_BONUS=$(PROJECT_DIR)/bonus
+DIR_MANDATORY = $(PROJECT_DIR)/mandatory
+DIR_BONUS = $(PROJECT_DIR)/bonus
 LIBFT_DIR := libft
 LIBFT_MAKE := $(MAKE) -C $(LIBFT_DIR)
 
+# Headers
+INCLUDES = minitalk.h libft/libft.h
+
 # Sources
-SRCS=$(DIR_MANDATORY)/client.c $(DIR_MANDATORY)/server.c $(DIR_MANDATORY)/utils.c
-SRCS_BONUS=$(DIR_BONUS)/client_bonus.c $(DIR_BONUS/)/server_bonus.c $(DIR_BONUS)/utils_bonus.c
+SRCS = $(DIR_MANDATORY)/client.c $(DIR_MANDATORY)/server.c $(DIR_MANDATORY)/utils.c
+SRCS_BONUS = $(DIR_BONUS)/client_bonus.c $(DIR_BONUS)/server_bonus.c $(DIR_BONUS)/utils_bonus.c
 
-# implicit rules with conversion (convert .c -> .o)
-OBJS=$(SRCS:.c=.o)
-OBJS_BONUS=$(SRCS_BONUS:.c=.o)
+# Object files
+OBJS = $(SRCS:.c=.o)
+OBJS_BONUS = $(SRCS_BONUS:.c=.o)
 
+# Select actual objects depending on BONUS
 ifdef BONUS
 	OBJS_ACTUAL := $(OBJS_BONUS)
 else
 	OBJS_ACTUAL := $(OBJS)
 endif
 
-AR: ar rcs
-RM: rm -rf
+# Tools
+AR = ar rcs
+RM = rm -rf
 
-NAME=minitalk.a
-
-#using simple assignement to immediate use
-define LIBFT_DO
-	$LIBFT_MAKE $(1)
-endef
+# Output
+NAME = minitalk.a
 
 # Default target
-all: $(NAME)
+all: build $(NAME) $(PROG_NAME)
 
-# Bonus mode
+# Bonus build
 bonus: BONUS=1
 bonus: all
 
-# Rule to build the static lib
+# Rule to build the static library
 $(NAME): $(OBJS_ACTUAL)
 	$(AR) $(NAME) $(OBJS_ACTUAL)
 
-# Link targets for programs (server/client)
+# Program rules (server/client)
 $(PROG_NAME): %: %.o $(NAME)
-	$(CC) -o $@ $^ -L. -lft
+	$(CC) $(CFLAGS) -o $@ $^ -L. -L$(LIBFT_DIR) -lft
 
+# Pattern rule to compile .c → .o with header deps
+%.o: %.c $(INCLUDES)
+	$(CC) $(CFLAGS) -I. -I$(LIBFT_DIR) -c $< -o $@
+
+# Build libft
 build:
 	$(LIBFT_MAKE)
 
-clean: 
+# Clean rules
+clean:
 	$(RM) $(OBJS) $(OBJS_BONUS)
-	$(call LIBFT_DO, fclean)
+	$(LIBFT_MAKE) clean
 
 fclean: clean
 	$(RM) $(NAME)
 	$(RM) $(PROG_NAME)
-	$(call LIBFT_DO, fclean)
+	$(LIBFT_MAKE) fclean
 
 re: fclean all
 

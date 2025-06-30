@@ -6,7 +6,14 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:45 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/30 17:16:46 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/30 18:06:20 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "minitalk.h"
+
+int main(void)
+{
+    ft_printf("this is the client_bonus\n");
+    return (0);
+}

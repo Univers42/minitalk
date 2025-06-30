@@ -6,12 +6,12 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:17 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/30 17:17:39 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/30 18:05:40 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINITALK_H
 # define MINITALK_H
-# include "libft.h"
+# include "libft/libft.h"
 
 #endif
