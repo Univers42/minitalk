@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:32 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/30 19:53:15 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/30 20:49:03 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include "minitalk.h"
 
 # define BYTE_SIZE	8
-
+# define HAND_SHAKED 1
 typedef struct	s_client
 {
 	t_pid	server_pid;

@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/17 14:38:48 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/30 19:57:28 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/30 20:33:58 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@
 # include <fcntl.h>
 # include <stdio.h>
 # include <sys/stat.h>
+# include <errno.h>
 
 typedef char*				t_string;
 typedef unsigned char		t_uint8;
