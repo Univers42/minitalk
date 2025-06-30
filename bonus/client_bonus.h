@@ -6,7 +6,11 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:48 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/30 17:16:49 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/30 19:54:46 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef CLIENT_BONUS_H
+# define CLIENT_BONUS_H
+
+#endif

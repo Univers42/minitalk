@@ -6,7 +6,12 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:53 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/30 17:16:54 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/30 19:55:54 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef SERVER_BONUS_H
+#define SERVER_BONUS_H
+# include "minitalk.h"
+
+#endif

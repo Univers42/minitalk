@@ -6,14 +6,15 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:35 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/30 18:06:05 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/30 19:53:30 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#include "server.h"
 
 int main()
 {
     ft_printf("this is the server\n");
+    log_msg(LOG_ERROR, "Test error");
     return (0);
 }

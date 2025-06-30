@@ -6,7 +6,7 @@
 #    By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/30 17:17:44 by dlesieur          #+#    #+#              #
-#    Updated: 2025/06/30 19:26:14 by dlesieur         ###   ########.fr        #
+#    Updated: 2025/06/30 19:51:49 by dlesieur         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,6 +19,11 @@ NAME := $(PROJECT_NAME).a
 # Compiler & Tools
 CC := cc
 CFLAGS := -Wall -Wextra -Werror
+ifeq ($(MINITALK_DEBUG),1)
+	CFLAGS += -DMINITALK_DEBUG=1
+else
+	CFLAGS += -DMINITALK_DEBUG=0
+endif
 AR := ar rcs
 RM := rm -rf
 
@@ -34,12 +39,15 @@ INCLUDE_FLAGS := -I. -I$(LIBFT_DIR)
 # Source files
 SRCS := $(MANDATORY_DIR)/client.c \
 	$(MANDATORY_DIR)/server.c \
-	$(MANDATORY_DIR)/utils.c
+	$(MANDATORY_DIR)/utils.c \
+	$(UTILS)
 
 SRCS_BONUS := $(BONUS_DIR)/client_bonus.c \
 	$(BONUS_DIR)/server_bonus.c \
-	$(BONUS_DIR)/utils_bonus.c
+	$(BONUS_DIR)/utils_bonus.c \
+	$(UTILS)
 
+UTILS := logs.c
 # Object files
 OBJS := $(SRCS:.c=.o)
 OBJS_BONUS := $(SRCS_BONUS:.c=.o)
@@ -66,7 +74,7 @@ all: build $(NAME) $(PROG_NAME)
 
 # Bonus support
 bonus:
-	$(MAKE) BONUS=1 all
+	$(MAKE) BONUS=1 DEBUG=1 all
 
 # Static library
 $(NAME): $(OBJS_ACTUAL)
