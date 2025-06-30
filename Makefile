@@ -6,79 +6,95 @@
 #    By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/30 17:17:44 by dlesieur          #+#    #+#              #
-#    Updated: 2025/06/30 18:08:47 by dlesieur         ###   ########.fr        #
+#    Updated: 2025/06/30 19:26:14 by dlesieur         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-# Project info
-PROG_NAME = server client
-PROJECT_DIR = .
-CC = cc
-CFLAGS = -Wall -Wextra -Werror
+# Project Metadata
+PROJECT_NAME := minitalk
+PROG_NAME := server client
+PROJECT_DIR := .
+NAME := $(PROJECT_NAME).a
+
+# Compiler & Tools
+CC := cc
+CFLAGS := -Wall -Wextra -Werror
+AR := ar rcs
+RM := rm -rf
 
 # Directories
-DIR_MANDATORY = $(PROJECT_DIR)/mandatory
-DIR_BONUS = $(PROJECT_DIR)/bonus
+MANDATORY_DIR := $(PROJECT_DIR)/mandatory
+BONUS_DIR := $(PROJECT_DIR)/bonus
 LIBFT_DIR := libft
-LIBFT_MAKE := $(MAKE) -C $(LIBFT_DIR)
 
-# Headers
-INCLUDES = minitalk.h libft/libft.h
+# Includes
+INCLUDES := minitalk.h $(LIBFT_DIR)/libft.h
+INCLUDE_FLAGS := -I. -I$(LIBFT_DIR)
 
-# Sources
-SRCS = $(DIR_MANDATORY)/client.c $(DIR_MANDATORY)/server.c $(DIR_MANDATORY)/utils.c
-SRCS_BONUS = $(DIR_BONUS)/client_bonus.c $(DIR_BONUS)/server_bonus.c $(DIR_BONUS)/utils_bonus.c
+# Source files
+SRCS := $(MANDATORY_DIR)/client.c \
+	$(MANDATORY_DIR)/server.c \
+	$(MANDATORY_DIR)/utils.c
+
+SRCS_BONUS := $(BONUS_DIR)/client_bonus.c \
+	$(BONUS_DIR)/server_bonus.c \
+	$(BONUS_DIR)/utils_bonus.c
 
 # Object files
-OBJS = $(SRCS:.c=.o)
-OBJS_BONUS = $(SRCS_BONUS:.c=.o)
+OBJS := $(SRCS:.c=.o)
+OBJS_BONUS := $(SRCS_BONUS:.c=.o)
 
-# Select actual objects depending on BONUS
+# Handle bonus switch
 ifdef BONUS
-	OBJS_ACTUAL := $(OBJS_BONUS)
+ OBJS_ACTUAL := $(OBJS_BONUS)
+ SRCS_ACTUAL := $(SRCS_BONUS)
 else
-	OBJS_ACTUAL := $(OBJS)
+ OBJS_ACTUAL := $(OBJS)
+ SRCS_ACTUAL := $(SRCS)
 endif
 
-# Tools
-AR = ar rcs
-RM = rm -rf
+# Determine object paths dynamically from OBJS_ACTUAL
+OBJS_PATH := $(dir $(firstword $(OBJS_ACTUAL)))
 
-# Output
-NAME = minitalk.a
+# Define macro for libft make
+define LIBFT_MAKE
+	$(MAKE) -C $(LIBFT_DIR) $(1)
+endef
 
-# Default target
+# Default rule
 all: build $(NAME) $(PROG_NAME)
 
-# Bonus build
-bonus: BONUS=1
-bonus: all
+# Bonus support
+bonus:
+	$(MAKE) BONUS=1 all
 
-# Rule to build the static library
+# Static library
 $(NAME): $(OBJS_ACTUAL)
 	$(AR) $(NAME) $(OBJS_ACTUAL)
 
-# Program rules (server/client)
-$(PROG_NAME): %: %.o $(NAME)
-	$(CC) $(CFLAGS) -o $@ $^ -L. -L$(LIBFT_DIR) -lft
+# Build binaries
+server: $(OBJS_PATH)server$(if $(BONUS),_bonus).o $(NAME)
+	$(CC) $(CFLAGS) -o $@ $< $(NAME) -L. -L$(LIBFT_DIR) -lft
 
-# Pattern rule to compile .c → .o with header deps
-%.o: %.c $(INCLUDES)
-	$(CC) $(CFLAGS) -I. -I$(LIBFT_DIR) -c $< -o $@
+client: $(OBJS_PATH)client$(if $(BONUS),_bonus).o $(NAME)
+	$(CC) $(CFLAGS) -o $@ $< $(NAME) -L. -L$(LIBFT_DIR) -lft
+
+# Compile .c → .o with header deps (only for actual sources)
+$(OBJS_ACTUAL): %.o: %.c $(INCLUDES)
+	$(CC) $(CFLAGS) $(INCLUDE_FLAGS) -c $< -o $@
 
 # Build libft
 build:
-	$(LIBFT_MAKE)
+	$(call LIBFT_MAKE)
 
-# Clean rules
+# Clean up
 clean:
 	$(RM) $(OBJS) $(OBJS_BONUS)
-	$(LIBFT_MAKE) clean
+	$(call LIBFT_MAKE,clean)
 
 fclean: clean
-	$(RM) $(NAME)
-	$(RM) $(PROG_NAME)
-	$(LIBFT_MAKE) fclean
+	$(RM) $(NAME) $(PROG_NAME)
+	$(call LIBFT_MAKE,fclean)
 
 re: fclean all
 
