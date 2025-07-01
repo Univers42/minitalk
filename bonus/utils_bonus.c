@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:55 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/30 21:13:39 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/06/30 21:23:40 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@ int	initialize_client(t_bclient *client, int argc, char **argv)
 	client->timeout = 0;
 	return (1);
 }
-
 
 void	cleanup_still_reachable(int sig)
 {
