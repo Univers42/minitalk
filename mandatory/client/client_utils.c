@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:42 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/01 13:06:58 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/01 13:51:27 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ t_client	*get_instance(t_client *set)
 }
 
 // Returns the value (0 or 1) of the bit at bit_index (7 to 0) in c
-inline int	get_bit_from_char(char c, int bit_index)
+int	get_bit_from_char(char c, int bit_index)
 {
 	int	value;
 	int	divisor;
@@ -80,8 +80,8 @@ inline void	send_bit(t_client *client, char c, int bit)
 		client->server_pid);
 	if (kill(client->server_pid, sig) == -1)
 	{
-		log_msg(LOG_ERROR, "kill() failed for PID %d: %s",
-			client->server_pid, strerror(errno));
+		log_msg(LOG_ERROR, "kill() failed for PID %d",
+			client->server_pid);
 		exit(1);
 	}
 	while (!client->ack)

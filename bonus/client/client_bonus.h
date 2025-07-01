@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:48 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/30 21:13:07 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/01 13:11:57 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 
 typedef t_client	t_legacy;
 
+# define HAND_SHAKED 1
 typedef struct s_bclient
 {
 	t_legacy		legacy_client;

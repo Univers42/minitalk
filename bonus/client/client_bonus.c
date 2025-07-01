@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:45 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/30 21:23:15 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/01 13:11:45 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ static void	handle_signal_bonus(int signal, siginfo_t *info, void *context)
 	processing = 1;
 	client = get_client_instance(NULL);
 	if (client && signal == SIGUSR1)
-		client->ack = 1;
+		client->ack = HAND_SHAKED;
 	processing = 0;
 }
 

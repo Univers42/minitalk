@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 10:47:48 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/01 12:47:56 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/01 14:52:05 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,21 +49,24 @@ t_client_state	*get_client_state(pid_t client_pid)
 	return (new);
 }
 
+/**
+expand with realloc and then set the new allocation to 0 to avoid
+segmentation fault for garbage access
+*/
 int	expand_client_buffer(t_client_state *state)
 {
 	t_string	new_buffer;
-	t_string	old_buffer;
-	size_t		new_size;
+	t_size		old_size;
+	t_size		new_size;
 
-	old_buffer = state->buffer;
-	new_size = state->buffer_size * 2;
-	new_buffer = ft_realloc(state->buffer, new_size, state->buffer_size);
+	old_size = state->buffer_size;
+	new_size = old_size * 2;
+	new_buffer = ft_realloc(state->buffer, new_size, old_size);
 	if (!new_buffer)
 		return (0);
-	//log_msg(LOG_INFO, "not enough space allocated, new size = %d from %d\n", ft_strlen(new_buffer), ft_strlen(old__buffer));
 	state->buffer = new_buffer;
-	ft_memset(state->buffer + state->buffer_size, 0,
-		new_size - state->buffer_size);
+	ft_memset(state->buffer + old_size, 0,
+		new_size - old_size);
 	state->buffer_size = new_size;
 	return (1);
 }

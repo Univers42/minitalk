@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:28 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/01 13:09:37 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/01 14:34:34 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ static void	send_byte(t_client *client, char c)
 
 	b_seq = BYTE_SIZE;
 	while (b_seq--)
-		send_bit(client, c, bit);
+		send_bit(client, c, b_seq);
 }
 
 // Sends the message, including the null terminator
@@ -67,15 +67,18 @@ static void	send_message(t_client *client)
 	send_byte(client, '\0');
 }
 
-static int	init_client(t_client *client, int argc, t_strings argv)
+static int init_client(t_client *client, int argc, t_strings argv)
 {
-	ft_memset(client, 0, sizeof(t_client));
-	if (argc != 3)
-		return (log_msg(LOG_INFO, "Usage: %s <server_pid> <message>",
-				argv[0]), 1);
-	client->server_pid = ft_atoi(argv[1]);
-	if (client->server_pid <= 0)
-		return (log_msg(LOG_ERROR, "Invalid server PID: %s", argv[1]), 1);
-	client->message = argv[2];
-	return (0);
+    ft_memset(client, 0, sizeof(t_client));
+    if (argc != 3)
+        return (log_msg(LOG_INFO, "Usage: %s <server_pid> <message>",
+                argv[0]), 1);
+    if (!is_valid_pid(argv[1]))
+        return (log_msg(LOG_ERROR, "the PID has to be integrals"), 1);
+    client->server_pid = ft_atoi(argv[1]);
+    if (!is_pid_alive(client->server_pid))
+        return (log_msg(LOG_ERROR, "Process with PID %d does not exist or is not accessible.",
+                    client->server_pid), 1);
+    client->message = argv[2];
+    return (0);
 }

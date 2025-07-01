@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:32 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/01 13:05:53 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/01 14:27:31 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,10 @@ typedef struct s_client
 }			t_client;
 
 t_client	*get_instance(t_client *set);
-inline int			get_bit_from_char(char c, int bit_index);
+int			get_bit_from_char(char c, int bit_index);
 void		get_signal_info(int bit_value, int *sig, t_strings sig_name);
 char		get_display_char(char c);
 void		send_bit(t_client *client, char c, int bit);
+int	is_pid_alive(pid_t pid);
+int			is_valid_pid(const char *str);
 #endif

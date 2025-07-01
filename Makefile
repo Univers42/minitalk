@@ -6,7 +6,7 @@
 #    By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/30 17:17:44 by dlesieur          #+#    #+#              #
-#    Updated: 2025/07/01 11:03:38 by dlesieur         ###   ########.fr        #
+#    Updated: 2025/07/01 14:28:02 by dlesieur         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,6 +41,7 @@ UTILS := logs.c
 SRCS := $(MANDATORY_DIR)/client.c \
 	$(MANDATORY_DIR)/server.c \
 	$(MANDATORY_DIR)/client_utils.c \
+	$(MANDATORY_DIR)/client_utils2.c \
 	$(MANDATORY_DIR)/server_utils.c\
 	$(MANDATORY_DIR)/server_utils2.c\
 	$(UTILS)

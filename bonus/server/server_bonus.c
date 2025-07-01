@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:50 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/06/30 21:23:31 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/01 15:47:45 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ static void	grow_buffer(t_server *srv, pid_t client_pid)
 
 	if (srv->buf_i + 2 > srv->buf_cap)
 	{
-		new_buf = ft_realloc(srv->msg_buf, srv->buf_cap, srv->buf_cap * 2);
+		new_buf = ft_realloc(srv->msg_buf, srv->buf_cap * 2, srv->buf_cap);
 		if (!new_buf)
 			return (flush(srv, client_pid, SECOND_FLUSH));
 		srv->msg_buf = new_buf;
