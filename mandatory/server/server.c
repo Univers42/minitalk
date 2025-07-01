@@ -6,38 +6,11 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:35 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/01 13:10:27 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/01 17:50:33 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "server.h"
 
-//forward declarations
-static void	process_complete_byte(t_client_state *state,
-	t_uint8 byte, pid_t client_pid);
-static void	add_bit_to_byte(t_uint8 *byte, int bit_value, int bit_index);
-static void	handle_signal(int signal, siginfo_t *info, void *context);
-
-int	main(void)
-{
-	t_client_state		*clients;
-	t_sigaction			sa;
-
-	clients = NULL;
-	get_clients(&clients);
-	ft_printf("Server started on PID %d\n", getpid());
-	sigemptyset(&sa.sa_mask);
-	sa.sa_sigaction = handle_signal;
-	sa.sa_flags = SA_SIGINFO;
-	if (sigaction(SIGUSR1, &sa, NULL) == -1)
-		return (log_msg(LOG_ERROR, "Error setting up SIGUSR1 handler"), 1);
-	if (sigaction(SIGUSR2, &sa, NULL) == -1)
-		return (log_msg(LOG_ERROR, "Error setting up SIGUSR2 handler"), 1);
-	log_msg(LOG_INFO, "Server ready, waiting for messages...");
-	while (1)
-		pause();
-	return (free_all_clients(), 0);
-}
 
 static void	process_complete_byte(t_client_state *state,
 	t_uint8 byte, pid_t client_pid)

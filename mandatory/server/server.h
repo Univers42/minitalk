@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:38 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/01 15:40:22 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/01 17:53:08 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,10 @@
 # include <sys/types.h>
 # include <signal.h>
 # include "../minitalk.h"
-# define BUFFER_SIZE 2048
+
+# define BUFFER_SIZE	2048
+# define TIMEOUT		5
+# define SLEEP_TIME		5000000
 
 typedef struct s_client_state
 {
