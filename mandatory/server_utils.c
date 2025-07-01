@@ -6,30 +6,11 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 10:47:48 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/01 10:47:54 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/01 12:47:56 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.h"
-
-void	free_all_clients(void)
-{
-	t_client_state	**clients;
-	t_client_state	*curr;
-	t_client_state	*next;
-
-	clients = get_clients(NULL);
-	curr = *clients;
-	while (curr)
-	{
-		next = curr->next;
-		if (curr->buffer)
-			free(curr->buffer);
-		free(curr);
-		curr = next;
-	}
-	*clients = NULL;
-}
 
 t_client_state	**get_clients(t_client_state **set)
 {
@@ -71,12 +52,15 @@ t_client_state	*get_client_state(pid_t client_pid)
 int	expand_client_buffer(t_client_state *state)
 {
 	t_string	new_buffer;
+	t_string	old_buffer;
 	size_t		new_size;
 
+	old_buffer = state->buffer;
 	new_size = state->buffer_size * 2;
-	new_buffer = realloc(state->buffer, new_size);
+	new_buffer = ft_realloc(state->buffer, new_size, state->buffer_size);
 	if (!new_buffer)
 		return (0);
+	//log_msg(LOG_INFO, "not enough space allocated, new size = %d from %d\n", ft_strlen(new_buffer), ft_strlen(old__buffer));
 	state->buffer = new_buffer;
 	ft_memset(state->buffer + state->buffer_size, 0,
 		new_size - state->buffer_size);
@@ -84,10 +68,18 @@ int	expand_client_buffer(t_client_state *state)
 	return (1);
 }
 
-char	get_printable_char(t_uint8 byte)
+int	handle_buffer_expansion(t_client_state *state, pid_t client_pid)
 {
-	if (ft_isprint(byte))
-		return (byte);
-	else
-		return ('.');
+	if ((size_t)state->byte_index >= state->buffer_size - 1)
+	{
+		if (!expand_client_buffer(state))
+		{
+			log_msg(LOG_ERROR, "Memory reallocation failed for client %d",
+				client_pid);
+			kill(client_pid, SIGUSR2);
+			reset_client_state(state);
+			return (0);
+		}
+	}
+	return (1);
 }

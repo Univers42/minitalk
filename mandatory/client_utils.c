@@ -1,16 +1,15 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   client_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:42 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/01 10:42:31 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/01 13:06:58 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "server.h"
 #include "client.h"
 #include <errno.h>
 
@@ -28,7 +27,7 @@ t_client	*get_instance(t_client *set)
 }
 
 // Returns the value (0 or 1) of the bit at bit_index (7 to 0) in c
-int	get_bit_from_char(char c, int bit_index)
+inline int	get_bit_from_char(char c, int bit_index)
 {
 	int	value;
 	int	divisor;
@@ -56,7 +55,7 @@ void	get_signal_info(int bit_value, t_array sig, t_strings sig_name)
 	}
 }
 
-char	get_display_char(char c)
+inline char	get_display_char(char c)
 {
 	if (c >= 32 && c <= 126)
 		return (c);
@@ -64,7 +63,7 @@ char	get_display_char(char c)
 		return ('.');
 }
 
-void	send_bit(t_client *client, char c, int bit)
+inline void	send_bit(t_client *client, char c, int bit)
 {
 	t_string	sig_name;
 	char		display_char;

@@ -6,18 +6,17 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 17:16:38 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/01 10:46:03 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/01 11:46:46 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_H
 # define SERVER_H
 
-# include "libft/libft.h"
 # include <sys/types.h>
 # include <signal.h>
 # include "../minitalk.h"
-# define BUFFER_SIZE 1024
+# define BUFFER_SIZE 5
 
 typedef struct s_client_state
 {
@@ -32,7 +31,6 @@ typedef struct s_client_state
 
 t_client_state	**get_clients(t_client_state **set);
 t_client_state	*get_client_state(pid_t client_pid);
-void			handle_signal(int signal, siginfo_t *info, void *context);
 void			free_all_clients(void);
 int				expand_client_buffer(t_client_state *state);
 char			get_printable_char(t_uint8 byte);

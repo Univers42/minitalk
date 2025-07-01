@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 10:49:15 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/01 10:49:18 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/01 13:10:12 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,18 +20,39 @@ void	handle_message_completion(t_client_state *state, pid_t client_pid)
 	reset_client_state(state);
 }
 
-int	handle_buffer_expansion(t_client_state *state, pid_t client_pid)
+
+void	reset_client_state(t_client_state *state)
 {
-	if ((size_t)state->byte_index >= state->buffer_size - 1)
+	state->byte = 0;
+	state->bit_index = 0;
+	state->byte_index = 0;
+	if (state->buffer)
+		ft_memset(state->buffer, 0, state->buffer_size);
+}
+
+void	free_all_clients(void)
+{
+	t_client_state	**clients;
+	t_client_state	*curr;
+	t_client_state	*next;
+
+	clients = get_clients(NULL);
+	curr = *clients;
+	while (curr)
 	{
-		if (!expand_client_buffer(state))
-		{
-			log_msg(LOG_ERROR, "Memory reallocation failed for client %d",
-				client_pid);
-			kill(client_pid, SIGUSR2);
-			reset_client_state(state);
-			return (0);
-		}
+		next = curr->next;
+		if (curr->buffer)
+			free(curr->buffer);
+		free(curr);
+		curr = next;
 	}
-	return (1);
+	*clients = NULL;
+}
+
+inline char	get_printable_char(t_uint8 byte)
+{
+	if (ft_isprint(byte))
+		return (byte);
+	else
+		return ('.');
 }
