@@ -5,108 +5,65 @@
 #                                                     +:+ +:+         +:+      #
 #    By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/06/30 17:17:44 by dlesieur          #+#    #+#              #
-#    Updated: 2025/07/01 14:28:02 by dlesieur         ###   ########.fr        #
+#    Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#              #
+#    Updated: 2025/07/02 19:00:00 by dlesieur         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-# Project Metadata
-PROJECT_NAME := minitalk
-PROG_NAME := server client
-PROJECT_DIR := .
-NAME := $(PROJECT_NAME).a
+NAME_SERVER = server
+NAME_CLIENT = client
 
-# Compiler & Tools
-CC := cc
-CFLAGS := -Wall -Wextra -Werror
-ifeq ($(MINITALK_DEBUG),1)
-	CFLAGS += -DMINITALK_DEBUG=1
-else
-	CFLAGS += -DMINITALK_DEBUG=0
-endif
-AR := ar rcs
-RM := rm -rf
+CC = cc
+CFLAGS = -Wall -Wextra -Werror -I./inc -I./inc/libft
+RM = rm -f
 
 # Directories
-MANDATORY_DIR := $(PROJECT_DIR)/mandatory
-BONUS_DIR := $(PROJECT_DIR)/bonus
-LIBFT_DIR := libft
-
-# Includes
-INCLUDES := minitalk.h $(LIBFT_DIR)/libft.h
-INCLUDE_FLAGS := -I. -I$(LIBFT_DIR)
+LIBFT_DIR = inc/libft
+SERVER_DIR = srcs/server
+CLIENT_DIR = srcs/client
+AUTOMATA_DIR = srcs/automata
 
 # Source files
-UTILS := logs.c
-SRCS := $(MANDATORY_DIR)/client.c \
-	$(MANDATORY_DIR)/server.c \
-	$(MANDATORY_DIR)/client_utils.c \
-	$(MANDATORY_DIR)/client_utils2.c \
-	$(MANDATORY_DIR)/server_utils.c\
-	$(MANDATORY_DIR)/server_utils2.c\
-	$(UTILS)
+SERVER_SRCS = $(SERVER_DIR)/main.c $(SERVER_DIR)/server.c $(SERVER_DIR)/signals.c $(SERVER_DIR)/server_loop.c
 
-SRCS_BONUS := $(BONUS_DIR)/client_bonus.c \
-	$(BONUS_DIR)/server_bonus.c \
-	$(BONUS_DIR)/utils_bonus.c \
-	$(UTILS)
+CLIENT_SRCS = $(CLIENT_DIR)/main.c $(CLIENT_DIR)/client.c $(CLIENT_DIR)/ping.c $(CLIENT_DIR)/parser.c $(CLIENT_DIR)/singleton.c
+
+AUTOMATA_SRCS = $(AUTOMATA_DIR)/singleton.c $(AUTOMATA_DIR)/log.c $(AUTOMATA_DIR)/format_state.c \
+				$(AUTOMATA_DIR)/spec.c $(AUTOMATA_DIR)/conversion.c $(AUTOMATA_DIR)/bufferization.c \
+				$(AUTOMATA_DIR)/verify.c
 
 # Object files
-OBJS := $(SRCS:.c=.o)
-OBJS_BONUS := $(SRCS_BONUS:.c=.o)
-
-# Handle bonus switch
-ifdef BONUS
- OBJS_ACTUAL := $(OBJS_BONUS)
- SRCS_ACTUAL := $(SRCS_BONUS)
-else
- OBJS_ACTUAL := $(OBJS)
- SRCS_ACTUAL := $(SRCS)
-endif
-
-# Determine object paths dynamically from OBJS_ACTUAL
-OBJS_PATH := $(dir $(firstword $(OBJS_ACTUAL)))
-
-# Define macro for libft make
-define LIBFT_MAKE
-	$(MAKE) -C $(LIBFT_DIR) $(1)
-endef
+SERVER_OBJS = $(SERVER_SRCS:.c=.o) $(AUTOMATA_SRCS:.c=.o)
+CLIENT_OBJS = $(CLIENT_SRCS:.c=.o) $(AUTOMATA_SRCS:.c=.o)
 
 # Default rule
-all: build $(NAME) $(PROG_NAME)
-
-# Bonus support
-bonus:
-	$(MAKE) BONUS=1 DEBUG=1 all
-
-# Static library
-$(NAME): $(OBJS_ACTUAL)
-	$(AR) $(NAME) $(OBJS_ACTUAL)
-
-# Build binaries
-server: $(OBJS_PATH)server$(if $(BONUS),_bonus).o $(NAME)
-	$(CC) $(CFLAGS) -o $@ $< $(NAME) -L. -L$(LIBFT_DIR) -lft
-
-client: $(OBJS_PATH)client$(if $(BONUS),_bonus).o $(NAME)
-	$(CC) $(CFLAGS) -o $@ $< $(NAME) -L. -L$(LIBFT_DIR) -lft
-
-# Compile .c → .o with header deps (only for actual sources)
-$(OBJS_ACTUAL): %.o: %.c $(INCLUDES)
-	$(CC) $(CFLAGS) $(INCLUDE_FLAGS) -c $< -o $@
+all: $(NAME_SERVER) $(NAME_CLIENT)
 
 # Build libft
-build:
-	$(call LIBFT_MAKE)
+$(LIBFT_DIR)/libft.a:
+	$(MAKE) -C $(LIBFT_DIR)
 
-# Clean up
+# Build server
+$(NAME_SERVER): $(SERVER_OBJS) $(LIBFT_DIR)/libft.a
+	$(CC) $(CFLAGS) -o $@ $(SERVER_OBJS) -L$(LIBFT_DIR) -lft
+
+# Build client
+$(NAME_CLIENT): $(CLIENT_OBJS) $(LIBFT_DIR)/libft.a
+	$(CC) $(CFLAGS) -o $@ $(CLIENT_OBJS) -L$(LIBFT_DIR) -lft
+
+# Compile .c to .o
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Clean
 clean:
-	$(RM) $(OBJS) $(OBJS_BONUS)
-	$(call LIBFT_MAKE,clean)
+	$(RM) $(SERVER_OBJS) $(CLIENT_OBJS)
+	$(MAKE) -C $(LIBFT_DIR) clean
 
 fclean: clean
-	$(RM) $(NAME) $(PROG_NAME)
-	$(call LIBFT_MAKE,fclean)
+	$(RM) $(NAME_SERVER) $(NAME_CLIENT)
+	$(MAKE) -C $(LIBFT_DIR) fclean
 
 re: fclean all
 
-.PHONY: all bonus build clean fclean re $(PROG_NAME)
+.PHONY: all clean fclean re
