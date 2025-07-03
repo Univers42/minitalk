@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:34:02 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 02:00:41 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 03:58:45 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,6 @@
 // Note: Color definitions are provided by libft/render/ft_colors.h
 
 typedef char			t_buffer[1024];
-<<<<<<< HEAD
-typedef t_format_state	(*t_state_action)(t_parser_ctx *ctx, char c);
-typedef void			(*t_flag_action)(t_format_spec *spec);
-typedef void			(*t_spec_action)(t_parser_ctx *ctx);
-=======
->>>>>>> temp
 
 typedef enum s_log_level
 {
@@ -83,6 +77,11 @@ typedef struct s_parser_ctx
 	struct s_parser_tables	*tables;
 }							t_parser_ctx;
 
+// Function pointer typedefs (must come after struct definitions)
+typedef t_format_state	(*t_state_action)(t_parser_ctx *ctx, char c);
+typedef void			(*t_flag_action)(t_format_spec *spec);
+typedef void			(*t_spec_action)(t_parser_ctx *ctx);
+
 typedef struct s_parser_tables
 {
 	t_flag			initialized;
@@ -125,11 +124,7 @@ void			buffer_append_str(t_buffer buffer, int *pos, const char *str);
 void			buffer_append_str_formatted(t_buffer buffer, int *pos,
 					const char *str, t_format_spec *spec);
 void			buffer_append_int_formatted(t_buffer buffer, int *pos,
-<<<<<<< HEAD
-					long num, t_format_spec *spec, int base);
-=======
 					long long num, t_format_spec *spec);
->>>>>>> temp
 void			put_level_buffered(t_buffer buffer, int *pos,
 					t_log_level level);
 void			log_msg(t_log_level level, const char *fmt, ...);
@@ -146,12 +141,9 @@ int				convert_number_to_string(char *dest, long num,
 					int base, int uppercase);
 int				format_with_precision(char *dest, const char *src,
 					t_format_spec *spec);
-<<<<<<< HEAD
-=======
 int				convert_to_string(long num, char *temp,
 					int base, int uppercase);
 void			init_class(t_parser_tables *tables);
 void			init_char_table(t_parser_tables *tables);
->>>>>>> temp
 
 #endif
