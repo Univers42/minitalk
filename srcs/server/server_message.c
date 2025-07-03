@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/03 03:25:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 03:13:10 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 04:33:56 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,22 +24,28 @@ void	handle_complete_message(t_client_state *client)
 	pid_t	client_pid;
 
 	client->msg.message[client->msg_pos] = '\0';
-	log_msg(LOG_SUCCESS, "Message reception complete: %d characters received",
-		client->msg_pos);
+	log_msg(LOG_SUCCESS, "Message reception complete: %d characters received", client->msg_pos);
 	print_message(client);
+	
 	client_pid = client->client_pid;
+	
+	// Clean up message memory
 	if (client->msg.message)
 	{
 		free(client->msg.message);
 		client->msg.message = NULL;
 	}
-	reset_client_state(client);
-	log_msg(LOG_INFO, "Client state reset, ready for new connections");
+	
+	// Send completion signal to client before resetting state
 	if (client_pid > 0)
 	{
 		log_msg(LOG_INFO, "Sending completion signal to client %d", client_pid);
 		kill(client_pid, SIGUSR1);
 	}
+	
+	// Reset client state and release server
+	reset_client_state(client);
+	log_msg(LOG_INFO, "Server released, ready for new connections");
 }
 
 void	process_character(t_client_state *client, int bit_value, int bit_pos)

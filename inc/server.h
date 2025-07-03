@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:19:40 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 03:15:26 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 04:33:57 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,12 +40,18 @@ typedef struct s_client_state
 	int			char_value;
 	int			msg_pos;
 	int			client_activity;
+	int			transmission_active;
+	int			queue_position;
 	t_message	msg;
 }	t_client_state;
 
 /* Singleton functions */
 t_client_state	*get_client_instance(void);
 void			reset_client_state(t_client_state *client);
+
+/* Queue management functions */
+int				is_server_busy(void);
+void			set_server_busy(pid_t client_pid);
 
 /* Signal handling functions */
 void			signal_handler(int signum, siginfo_t *info, void *context);

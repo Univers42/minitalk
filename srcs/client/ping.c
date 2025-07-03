@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/03 02:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 03:27:46 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 04:33:51 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,27 +16,41 @@ void	ping_handler(int signum, siginfo_t *info, void *context)
 {
 	t_server_state	*server;
 	const char		*signal_name;
+	pid_t			my_pid;
 
 	(void)context;
 	server = get_server_instance();
+	my_pid = getpid();
+	
 	if (signum == SIGUSR1)
 		signal_name = "SIGUSR1 (READY)";
 	else
 		signal_name = "SIGUSR2 (BUSY)";
+	
 	log_msg(LOG_DEBUG, "Ping handler received %s from PID %d",
 		signal_name, info->si_pid);
-	if (info->si_pid == getpid())
+	
+	if (info->si_pid == my_pid)
 	{
 		log_msg(LOG_ERROR, "Received signal from own process");
 		exit(EXIT_FAILURE);
 	}
-	// Only process ping responses during the ping phase
+	
+	// Only process ping responses from the server we're trying to connect to
 	if (server->pid != 0 && info->si_pid != server->pid)
 	{
 		log_msg(LOG_WARNING, "Ignoring signal from unexpected PID: %d (expected %d)",
 			info->si_pid, server->pid);
 		return ;
 	}
+	
+	// Don't process ping responses if we're already in transmission mode
+	if (server->transmission_active)
+	{
+		log_msg(LOG_DEBUG, "Ignoring ping response during active transmission");
+		return ;
+	}
+	
 	handle_ping_response(signum, server, info->si_pid);
 }
 
@@ -89,17 +103,24 @@ int	ping(int pid)
 	t_server_state		*server;
 
 	server = get_server_instance();
+	
+	// Reset state completely before starting
+	reset_server_state();
+	
 	setup_ping_signals(&sa, &sigset);
 	server->pid = pid;
 	server->is_ready = 0;
-	server->ready_to_proceed = 0; // Reset transmission state
+	server->ready_to_proceed = 0;
+	server->transmission_active = 0; // Reset transmission state
+	
 	if (handle_timeouts(pid))
 	{
 		ft_printf("Error: Couldn't reach server PID %d\n", pid);
 		log_msg(LOG_ERROR, "Server ping timeout");
 		return (0);
 	}
-	ft_printf("Server ready, sending message.\n");
+	
+	ft_printf("Server ready, waiting for transmission slot...\n");
 	log_msg(LOG_SUCCESS, "Server connection established");
 	return (1);
 }

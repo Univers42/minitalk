@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:11:03 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 02:15:13 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 04:34:04 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,13 +53,14 @@ void	wait_for_server_ack(void)
 
 	server = get_server_instance();
 	timeout_count = 0;
-	// Adaptive timeout: minimum 30 seconds, more for large messages
-	max_timeout = 300000; // 30 seconds base timeout
+	max_timeout = 600000; // 60 seconds for large messages
+	
 	log_msg(LOG_DEBUG, "Waiting for server acknowledgment...");
 	while (!server->ready_to_proceed)
 	{
 		usleep(100);
 		timeout_count++;
+		
 		if (timeout_count > max_timeout)
 		{
 			ft_printf("Error: Server acknowledgment timeout\n");
@@ -71,6 +72,49 @@ void	wait_for_server_ack(void)
 	server->ready_to_proceed = 0;
 	log_msg(LOG_DEBUG, "Server acknowledgment received after %d microseconds",
 		timeout_count * 100);
+}
+
+void	wait_for_transmission_slot(t_client *data)
+{
+	t_server_state	*server;
+	int				wait_count;
+	pid_t			my_pid;
+
+	(void)data; // Mark parameter as unused
+	server = get_server_instance();
+	my_pid = getpid();
+	wait_count = 0;
+	
+	log_msg(LOG_INFO, "Waiting for transmission slot...");
+	while (server->transmission_active && !is_transmission_owner(my_pid))
+	{
+		usleep(10000); // 10ms
+		wait_count++;
+		
+		// Re-ping server every 30 seconds to check availability
+		if (wait_count % 3000 == 0)
+		{
+			log_msg(LOG_INFO, "Still waiting for transmission slot (waited %d seconds)", 
+				wait_count / 100);
+			if (kill(server->pid, SIGUSR1) == -1)
+			{
+				log_msg(LOG_ERROR, "Server appears to be down");
+				exit(EXIT_FAILURE);
+			}
+		}
+		
+		// Maximum wait time: 10 minutes
+		if (wait_count > 60000)
+		{
+			ft_printf("Error: Transmission slot timeout\n");
+			log_msg(LOG_ERROR, "Timeout waiting for transmission slot");
+			exit(EXIT_FAILURE);
+		}
+	}
+	
+	// Claim the transmission slot
+	set_transmission_active(my_pid);
+	log_msg(LOG_SUCCESS, "Transmission slot acquired");
 }
 
 void	send_bit(unsigned long long value, int i, t_client *info)

@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:22:54 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 03:06:00 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 04:33:55 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ t_client_state	*get_client_instance(void)
 		ft_memset(&instance, 0, sizeof(t_client_state));
 		instance.getting_header = 1;
 		instance.msg.size_message = 0;
+		instance.transmission_active = 0;
+		instance.queue_position = 0;
 		initialized = 1;
 	}
 	return (&instance);
@@ -29,6 +31,9 @@ t_client_state	*get_client_instance(void)
 
 void	reset_client_state(t_client_state *client)
 {
+	pid_t	old_pid = client->actual_pid;
+	int		was_active = client->transmission_active;
+	
 	if (client->msg.message)
 	{
 		free(client->msg.message);
@@ -37,6 +42,28 @@ void	reset_client_state(t_client_state *client)
 	ft_bzero(client, sizeof(t_client_state));
 	client->getting_header = 1;
 	client->msg.size_message = 0;
+	client->transmission_active = 0;
+	
+	if (was_active && old_pid > 0)
+		log_msg(LOG_INFO, "Released transmission slot from client PID %d", old_pid);
+}
+
+int	is_server_busy(void)
+{
+	t_client_state	*client;
+
+	client = get_client_instance();
+	return (client->transmission_active && client->actual_pid > 0);
+}
+
+void	set_server_busy(pid_t client_pid)
+{
+	t_client_state	*client;
+
+	client = get_client_instance();
+	client->transmission_active = 1;
+	client->actual_pid = client_pid;
+	log_msg(LOG_INFO, "Server now busy with client PID %d", client_pid);
 }
 
 int	get_bit_value(int signum)

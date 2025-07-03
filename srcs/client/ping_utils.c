@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/03 03:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 03:26:31 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 04:34:48 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,15 @@ void	handle_ping_response(int signum, t_server_state *server, pid_t pid)
 {
 	if (signum == SIGUSR1)
 	{
+		// Server is ready or transmission slot is available
 		server->is_ready = 1;
-		log_msg(LOG_SUCCESS, "Server ready signal received from PID %d",
-			pid);
+		log_msg(LOG_SUCCESS, "Server ready signal received from PID %d", pid);
 	}
-	if (signum == SIGUSR2)
+	else if (signum == SIGUSR2)
 	{
+		// Server is busy with another client
 		server->is_ready = 0;
-		log_msg(LOG_INFO, "Server busy signal received from PID %d",
-			pid);
+		log_msg(LOG_INFO, "Server busy signal received from PID %d", pid);
 	}
 }
 
@@ -58,17 +58,30 @@ void	setup_ping_signals(struct sigaction *sa, sigset_t *sigset)
 
 void	send_message(char *str, t_client *data)
 {
-	int	i;
+	int				i;
+	pid_t			my_pid;
+	//t_server_state	*server;
 
 	i = 0;
+	my_pid = getpid();
+	//server = get_server_instance();
+	
 	log_msg(LOG_INFO, "Starting message transmission: \"%s\"", str);
+	
 	while (str[i])
 	{
+		// Verify we still own the transmission before each character
+		if (!is_transmission_owner(my_pid))
+		{
+			log_msg(LOG_ERROR, "Lost transmission ownership during message send");
+			exit(EXIT_FAILURE);
+		}
+		
 		log_msg(LOG_DEBUG, "Sending character %d: '%c' (ASCII: %d)",
 			i + 1, str[i], str[i]);
 		send_signals(&str[i], 8, data);
 		i++;
 	}
-	log_msg(LOG_SUCCESS, "Message transmission complete:"
-		" %d characters sent", i);
+	
+	log_msg(LOG_SUCCESS, "Message transmission complete: %d characters sent", i);
 }

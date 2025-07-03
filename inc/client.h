@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:19:45 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 04:17:39 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 04:33:54 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,11 +46,17 @@ typedef struct s_server_state
 	pid_t	pid;
 	int		is_ready;
 	int		ready_to_proceed;
+	int		transmission_active;
+	pid_t	current_client_pid;
+	int		transmission_id;
 }			t_server_state;
 
 /* Singleton functions */
 t_server_state	*get_server_instance(void);
 void			reset_server_state(void);
+void			set_transmission_active(pid_t client_pid);
+int				is_transmission_owner(pid_t client_pid);
+void			end_transmission(void);
 
 /* Parser functions */
 t_parser_result	parse_arguments(int argc, char **argv);
@@ -60,6 +66,7 @@ int				validate_pid_string(const char *str);
 int				ping(int pid);
 void			send_signals(void *data, size_t bit_length, t_client *info);
 void			send_message(char *str, t_client *data);
+void			wait_for_transmission_slot(t_client *data);
 
 /* Utility functions */
 void			init_data(char **argv, t_client *data);

@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 02:53:36 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 04:33:56 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,23 +34,47 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 	info->si_pid = lost_signal(info->si_pid, signum, context);
 	if (info->si_pid == getpid())
 		return ;
+	
 	client->client_pid = info->si_pid;
+	
+	// Handle new client connection (ping)
 	if (client->actual_pid == 0)
 	{
-		log_msg(LOG_INFO, "New client connection from PID %d",
-				client->client_pid), pong(client->client_pid);
+		log_msg(LOG_INFO, "New client connection from PID %d", client->client_pid);
+		pong(client->client_pid);
 		return ;
 	}
+	
+	// Handle signals from different clients
 	if (client->actual_pid != client->client_pid)
-		(log_msg(LOG_WARNING, "Signal from unexpected PID %d"
-				" (expected %d)", client->client_pid, client->actual_pid));
+	{
+		// If server is busy, send busy signal to new client
+		if (is_server_busy())
+		{
+			log_msg(LOG_WARNING, "Server busy, rejecting signal from PID %d (current client: %d)", 
+				client->client_pid, client->actual_pid);
+			kill(client->client_pid, SERVER_BUSY);
+			return ;
+		}
+		else
+		{
+			// This might be a ping from a queued client
+			log_msg(LOG_INFO, "Ping from queued client PID %d", client->client_pid);
+			pong(client->client_pid);
+			return ;
+		}
+	}
+	
+	// Process signals from the active client
 	client->client_activity = 1;
-	log_msg(LOG_DEBUG, "Processing signal %d from client %d",
-		signum, client->client_pid);
+	log_msg(LOG_DEBUG, "Processing signal %d from active client %d", signum, client->client_pid);
+	
 	if (client->getting_header == 1)
 		handle_header(signum);
 	else if (client->getting_msg == 1)
 		handle_msg(signum);
+	
+	// Send acknowledgment back to the active client
 	if (client->actual_pid > 0)
 		kill(client->client_pid, SIGUSR2);
 }

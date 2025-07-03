@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 02:21:50 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 04:33:55 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,23 @@ int	pong(int pid)
 	t_client_state	*client;
 
 	client = get_client_instance();
-	client->actual_pid = pid;
+	
+	// Check if server is already busy with another client
+	if (is_server_busy() && client->actual_pid != pid)
+	{
+		log_msg(LOG_INFO, "Server busy, sending busy signal to client %d", pid);
+		kill(pid, SERVER_BUSY);
+		return (EXIT_SUCCESS);
+	}
+	
+	// If not busy or this is the same client, accept the connection
+	set_server_busy(pid);
 	client->getting_header = 1;
 	client->getting_msg = 0;
 	client->sig_count = 0;
 	client->msg_pos = 0;
 	client->char_value = 0;
+	
 	log_msg(LOG_INFO, "Client %d connected, sending ready signal", pid);
 	kill(pid, SERVER_READY);
 	log_msg(LOG_SUCCESS, "Server ready signal sent to client %d", pid);
