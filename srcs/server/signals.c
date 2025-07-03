@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 13:29:11 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 17:25:47 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,6 @@ int	pong(int pid)
 		kill(pid, SERVER_BUSY);
 		return (EXIT_SUCCESS);
 	}
-	
-	// Properly reset the client state structure (not just the pointer)
 	ft_memset(client, 0, sizeof(*client));
 	client->actual_pid = pid;
 	client->client_pid = pid;
@@ -34,7 +32,6 @@ int	pong(int pid)
 	client->msg_pos = 0;
 	client->char_value = 0;
 	client->client_activity = 1;
-	
 	set_server_busy(pid);
 	log_msg(LOG_INFO, "Client %d connected, sending ready signal", pid);
 	kill(pid, SERVER_READY);

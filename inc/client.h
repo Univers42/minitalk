@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:19:45 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 15:20:33 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 17:00:21 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,4 +85,40 @@ void			log_ping_result(int attempt, int success);
 void			setup_ping_signals(struct sigaction *sa, sigset_t *sigset);
 void			ping_handler(int signum, siginfo_t *info, void *context);
 int				calculate_checksum(const char *data, int length);
+
+/* Time and retry functions */
+int				attempt_ping(int pid, int attempt);
+void			handle_retry_delay(int attempt);
+int				handle_timeout(int timeout_count, int max_timeout);
+
+/* Initialization functions */
+void			setup_ping_signals(struct sigaction *sa, sigset_t *sigset);
+void			setup_signal_handlers(sigset_t *sigset, struct sigaction *sa);
+void			reset_server_state(void);
+void			prepare_transmission(t_client *data, int msg_len);
+
+/* Connection and handshake functions */
+void			establish_connection(t_client *data);
+void			handle_acknowledgment(t_server_state *server);
+void			wait_for_server_ack(void);
+void			signal_handler(int signum, siginfo_t *info, void *context);
+
+/* Debug and logging functions */
+void			log_ping_signal(int signum, pid_t sender_pid);
+
+/* Validation functions */
+void			validate_and_init(int argc, char **argv, t_client *data);
+int				validate_signal_source(t_server_state *server, pid_t sender_pid);
+int				validate_process_exists(int pid);
+void			check_transmission_ownership(pid_t my_pid, int total_chars, int i);
+int				validate_ping_signal(t_server_state *server, siginfo_t *info);
+
+/* Bit manipulation functions */
+void			send_signal(pid_t pid, int signal);
+void			send_data_bit(int bit_value, t_client *info);
+void			send_bit(unsigned long long value, int i, t_client *info);
+
+/* Ping utility functions */
+void			handle_pong(int signum, t_server_state *server, pid_t pid);
+int				send_ping_signal(int pid);
 #endif

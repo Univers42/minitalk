@@ -6,18 +6,15 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/03 03:25:33 by codespace         #+#    #+#             */
+<<<<<<< Updated upstream
 /*   Updated: 2025/07/03 18:01:29 by codespace        ###   ########.fr       */
+=======
+/*   Updated: 2025/07/03 17:32:02 by codespace        ###   ########.fr       */
+>>>>>>> Stashed changes
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.h"
-
-void	print_message(t_client_state *client)
-{
-	write(1, HEADER_MESSAGE, 18);
-	write(1, client->msg.message, client->msg.size_message);
-	write(1, "\n", 1);
-}
 
 void	handle_complete_message(t_client_state *client)
 {
@@ -36,19 +33,6 @@ void	handle_complete_message(t_client_state *client)
 	send_completion_signal(client_pid);
 	reset_client_state(client);
 	log_msg(LOG_INFO, "Server released, ready for new connections");
-}
-
-static void	log_character_completion(t_client_state *client)
-{
-	char	display_char;
-
-	if (client->char_value >= 32 && client->char_value <= 126)
-		display_char = client->char_value;
-	else
-		display_char = '?';
-	log_msg(LOG_DEBUG, "Character complete: '%c' (ASCII: %d) at position %d/%d",
-		display_char, client->char_value, client->msg_pos + 1,
-		client->msg.size_message);
 }
 
 void	process_character(t_client_state *client, int bit_value, int bit_pos)

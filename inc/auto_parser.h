@@ -6,7 +6,11 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:34:02 by dlesieur          #+#    #+#             */
+<<<<<<< Updated upstream
 /*   Updated: 2025/07/03 18:08:17 by codespace        ###   ########.fr       */
+=======
+/*   Updated: 2025/07/03 17:20:35 by codespace        ###   ########.fr       */
+>>>>>>> Stashed changes
 /*                                                                            */
 /* ************************************************************************** */
 

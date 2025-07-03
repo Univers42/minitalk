@@ -1,20 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   singleton.c                                        :+:      :+:    :+:   */
+/*   checksum.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/03 02:17:43 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 17:11:14 by codespace        ###   ########.fr       */
+/*   Created: 2025/07/03 16:19:08 by codespace         #+#    #+#             */
+/*   Updated: 2025/07/03 17:00:28 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "client.h"
 
-t_server_state	*get_server_instance(void)
+int	calculate_checksum(const char *data, int length)
 {
-	static t_server_state	server = {0, 0, 0, 0, 0, 0, 0, 0};
+	int	checksum;
+	int	i;
 
-	return (&server);
+	checksum = 0;
+	i = 0;
+	while (i < length)
+	{
+		checksum ^= data[i];
+		checksum = (checksum << 1) | (checksum >> 31);
+		i++;
+	}
+	return (checksum);
 }

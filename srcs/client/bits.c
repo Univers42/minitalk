@@ -1,0 +1,79 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   bits.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/03 02:11:03 by codespace         #+#    #+#             */
+/*   Updated: 2025/07/03 18:19:21 by codespace        ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "client.h"
+
+void	send_signal(pid_t pid, int signal)
+{
+	const char	*signal_name;
+
+	if (signal == SIGUSR1)
+		signal_name = "SIGUSR1 (0)";
+	else
+		signal_name = "SIGUSR2 (1)";
+	if (kill(pid, 0) == -1)
+	{
+		ft_printf("Error: Server process PID %d no longer exists\n", pid);
+		log_msg(LOG_ERROR, "Server process PID %d disappeared", pid);
+		exit(EXIT_FAILURE);
+	}
+	if (kill(pid, signal) == -1)
+	{
+		ft_printf("Error: Signal sending failed\n");
+		log_msg(LOG_ERROR, "Failed to send signal %d to PID %d", signal, pid);
+		exit(EXIT_FAILURE);
+	}
+	log_msg(LOG_DEBUG, "Sent signal %s to server PID %d", signal_name, pid);
+}
+
+void	send_data_bit(int bit_value, t_client *info)
+{
+	if (bit_value)
+		send_signal(info->server_pid, CHAR_1);
+	else
+		send_signal(info->server_pid, CHAR_0);
+}
+
+void	send_bit(unsigned long long value, int i, t_client *info)
+{
+	int	bit_value;
+
+	bit_value = 0;
+	if (value &(1ULL << i))
+		bit_value = 1;
+	log_msg(LOG_DEBUG, "Sending bit %d: %d to server PID %d", i, bit_value,
+		info->server_pid);
+	send_data_bit(bit_value, info);
+	wait_for_server_ack();
+}
+
+void	send_signals(void *data, size_t bit_length, t_client *info)
+{
+	unsigned long long	value;
+	int					i;
+
+	value = 0;
+	if (bit_length == 8)
+		value = *((unsigned char *)data);
+	else if (bit_length == 32)
+		value = *((unsigned int *)data);
+	log_msg(LOG_INFO, "Sending %zu-bit value: %llu (0x%llx) to server PID %d",
+		bit_length,
+		value, value, info->server_pid);
+	i = bit_length - 1;
+	while (i >= 0)
+	{
+		send_bit(value, i, info);
+		i--;
+	}
+	log_msg(LOG_SUCCESS, "Successfully sent %zu bits", bit_length);
+}

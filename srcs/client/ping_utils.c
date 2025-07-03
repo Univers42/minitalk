@@ -6,13 +6,13 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/03 03:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 15:18:30 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 17:13:26 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "client.h"
 
-void	handle_ping_response(int signum, t_server_state *server, pid_t pid)
+void	handle_pong(int signum, t_server_state *server, pid_t pid)
 {
 	if (signum == SIGUSR1)
 	{
@@ -23,49 +23,6 @@ void	handle_ping_response(int signum, t_server_state *server, pid_t pid)
 	{
 		server->is_ready = 0;
 		log_msg(LOG_WARNING, "Server busy signal received from PID %d", pid);
-	}
-}
-
-void	log_ping_attempt(int attempt, int max_attempts)
-{
-	log_msg(LOG_DEBUG, "Sending ping signal %d/%d to server",
-		attempt, max_attempts);
-	log_msg(LOG_INFO, "Waiting for server response (attempt %d/%d)",
-		attempt, max_attempts);
-}
-
-void	log_ping_result(int attempt, int success)
-{
-	if (success)
-		log_msg(LOG_SUCCESS, "Server responded on attempt %d", attempt);
-	else
-		log_msg(LOG_WARNING, "No response on attempt %d, retrying...", attempt);
-}
-
-void	setup_ping_signals(struct sigaction *sa, sigset_t *sigset)
-{
-	sigemptyset(sigset);
-	sigaddset(sigset, SIGUSR1);
-	sigaddset(sigset, SIGUSR2);
-	sa->sa_flags = SA_SIGINFO;
-	sa->sa_sigaction = ping_handler;
-	sa->sa_mask = *sigset;
-	sigaction(SIGUSR1, sa, NULL);
-	sigaction(SIGUSR2, sa, NULL);
-}
-
-static void	check_transmission_ownership(pid_t my_pid, int total_chars, int i)
-{
-	if (!is_transmission_owner(my_pid))
-	{
-		log_msg(LOG_ERROR, "Lost transmission ownership during message send");
-		exit(EXIT_FAILURE);
-	}
-	if (total_chars > 5000 && (i % 1000 == 0) && i > 0)
-	{
-		int percentage = (i * 100) / total_chars;
-		ft_printf("Progress: %d%% (%d/%d characters)\n", percentage, i,
-			total_chars);
 	}
 }
 

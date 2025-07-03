@@ -1,20 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   singleton.c                                        :+:      :+:    :+:   */
+/*   crook.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/03 02:17:43 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 17:11:14 by codespace        ###   ########.fr       */
+/*   Created: 2025/07/03 17:26:43 by codespace         #+#    #+#             */
+/*   Updated: 2025/07/03 18:11:15 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "client.h"
+#include "server.h"
 
-t_server_state	*get_server_instance(void)
+int	check_client_disconnection(t_client_state *client)
 {
-	static t_server_state	server = {0, 0, 0, 0, 0, 0, 0, 0};
-
-	return (&server);
+	if (client->actual_pid == 0)
+	{
+		log_msg(LOG_DEBUG, "Client disconnected normally");
+		return (1);
+	}
+	return (0);
 }

@@ -2,11 +2,6 @@
 *.o
 *.obj
 
-# Executables
-client
-server
-/client
-/server
 
 # Debug files
 *.dSYM/

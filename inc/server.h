@@ -6,7 +6,11 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:19:40 by dlesieur          #+#    #+#             */
+<<<<<<< Updated upstream
 /*   Updated: 2025/07/03 18:12:01 by codespace        ###   ########.fr       */
+=======
+/*   Updated: 2025/07/03 17:33:24 by codespace        ###   ########.fr       */
+>>>>>>> Stashed changes
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +27,16 @@
 # define SERVER_BUSY SIGUSR2
 # define EXIT_SUCCESS 0
 # define EXIT_FAILURE 1
+<<<<<<< Updated upstream
 # define TIMEOUT	50000
 # define SLEEP_TIME 50000
 
+=======
+# define TIMEOUT 5
+# define SLEEP_TIME 500000
+# define TIMEOUT 5
+# define SLEEP_TIME 500000
+>>>>>>> Stashed changes
 
 typedef struct s_message
 {

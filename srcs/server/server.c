@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:22:54 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 13:32:24 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 17:34:09 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,62 +28,7 @@ int	calculate_checksum(const char *data, int length)
 	return (checksum);
 }
 
-t_client_state	*get_client_instance(void)
-{
-	static t_client_state	instance;
-	static int				initialized = 0;
 
-	if (!initialized)
-	{
-		ft_memset(&instance, 0, sizeof(t_client_state));
-		instance.getting_header = 1;
-		instance.msg.size_message = 0;
-		instance.transmission_active = 0;
-		instance.queue_position = 0;
-		instance.sequence_number = 0;
-		instance.expected_checksum = 0;
-		instance.calculated_checksum = 0;
-		initialized = 1;
-	}
-	return (&instance);
-}
-
-void	reset_client_state(t_client_state *client)
-{
-	pid_t	old_pid = client->actual_pid;
-	int		was_active = client->transmission_active;
-	
-	if (client->msg.message)
-	{
-		free(client->msg.message);
-		client->msg.message = NULL;
-	}
-	ft_bzero(client, sizeof(t_client_state));
-	client->getting_header = 1;
-	client->msg.size_message = 0;
-	client->transmission_active = 0;
-	
-	if (was_active && old_pid > 0)
-		log_msg(LOG_INFO, "Released transmission slot from client PID %d", old_pid);
-}
-
-int	is_server_busy(void)
-{
-	t_client_state	*client;
-
-	client = get_client_instance();
-	return (client->transmission_active && client->actual_pid > 0);
-}
-
-void	set_server_busy(pid_t client_pid)
-{
-	t_client_state	*client;
-
-	client = get_client_instance();
-	client->transmission_active = 1;
-	client->actual_pid = client_pid;
-	log_msg(LOG_INFO, "Server now busy with client PID %d", client_pid);
-}
 
 int	get_bit_value(int signum)
 {
@@ -157,4 +102,11 @@ void	handle_header(int signum)
 		}
 		memory_reserve_to_store_signals();
 	}
+}
+
+
+void	keep_server_up(void)
+{
+	while (1)
+		check_clean_status();
 }
