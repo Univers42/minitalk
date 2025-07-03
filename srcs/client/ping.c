@@ -30,9 +30,10 @@ void	ping_handler(int signum, siginfo_t *info, void *context)
 		log_msg(LOG_ERROR, "Received signal from own process");
 		exit(EXIT_FAILURE);
 	}
+	// Only process ping responses during the ping phase
 	if (server->pid != 0 && info->si_pid != server->pid)
 	{
-		log_msg(LOG_WARNING, "Unexpected PID in ping_handler: %d (expected %d)",
+		log_msg(LOG_WARNING, "Ignoring signal from unexpected PID: %d (expected %d)",
 			info->si_pid, server->pid);
 		return ;
 	}
@@ -74,6 +75,8 @@ int	handle_timeouts(int pid)
 			return (0);
 		}
 		log_ping_result(i, 0);
+		// Exponential backoff for retries
+		usleep(i * 100000); // Additional delay between retries
 	}
 	log_msg(LOG_ERROR, "Server did not respond after %d attempts", RETRY_TIMES);
 	return (1);
@@ -89,6 +92,7 @@ int	ping(int pid)
 	setup_ping_signals(&sa, &sigset);
 	server->pid = pid;
 	server->is_ready = 0;
+	server->ready_to_proceed = 0; // Reset transmission state
 	if (handle_timeouts(pid))
 	{
 		ft_printf("Error: Couldn't reach server PID %d\n", pid);

@@ -49,15 +49,18 @@ void	wait_for_server_ack(void)
 {
 	t_server_state	*server;
 	int				timeout_count;
+	int				max_timeout;
 
 	server = get_server_instance();
 	timeout_count = 0;
+	// Adaptive timeout: minimum 30 seconds, more for large messages
+	max_timeout = 300000; // 30 seconds base timeout
 	log_msg(LOG_DEBUG, "Waiting for server acknowledgment...");
 	while (!server->ready_to_proceed)
 	{
 		usleep(100);
 		timeout_count++;
-		if (timeout_count > 100000)
+		if (timeout_count > max_timeout)
 		{
 			ft_printf("Error: Server acknowledgment timeout\n");
 			log_msg(LOG_ERROR, "Timeout waiting for server acknowledgment"

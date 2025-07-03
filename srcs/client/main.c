@@ -25,6 +25,14 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 		signal_name = "SIGUSR2";
 	log_msg(LOG_DEBUG, "Received signal %s from PID %d",
 		signal_name, info->si_pid);
+	
+	// Only accept signals from the server we're connected to
+	if (server->pid != 0 && info->si_pid != server->pid)
+	{
+		log_msg(LOG_WARNING, "Ignoring signal from unexpected PID: %d", info->si_pid);
+		return ;
+	}
+	
 	if (signum == SIGUSR2)
 	{
 		server->ready_to_proceed = 1;
@@ -55,6 +63,15 @@ void	start_transmission(t_client *data, int msg_len)
 	log_msg(LOG_INFO, "Starting header transmission (message length)");
 	send_signals(&msg_len, 32, data);
 	log_msg(LOG_INFO, "Header transmission complete, starting message content");
+	
+	// For large messages, inform user about expected time
+	if (msg_len > 10000)
+	{
+		ft_printf("Large message detected (%d chars). This may take several minutes...\n", msg_len);
+		log_msg(LOG_INFO, "Large message transmission started, estimated time: %d minutes", 
+			(msg_len * 8 * 100) / (1000 * 1000 * 60)); // Rough estimate
+	}
+	
 	send_message(data->msg, data);
 	log_msg(LOG_INFO, "All data transmitted, waiting for final confirmation");
 }
@@ -85,8 +102,12 @@ int	main(int argc, char **argv)
 	msg_len = ft_strlen(argv[2]);
 	ft_printf("Sending message (%d characters)\n", msg_len);
 	log_msg(LOG_INFO, "Message length: %d characters", msg_len);
+	
+	// Setup signal handlers after ping is complete
 	setup_signal_handlers(&sigset, &sa);
 	start_transmission(&data, msg_len);
+	
+	// Wait indefinitely for server confirmation
 	while (1)
 		pause();
 	return (EXIT_SUCCESS);
