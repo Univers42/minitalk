@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   client.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
+/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:19:45 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/02 19:00:00 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/03 03:27:30 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,21 +15,16 @@
 
 # include "libft.h"
 # include "auto_parser.h"
-# include "minitalk.h"
-# include <signal.h>
-# include <sys/types.h>
-# include <unistd.h>
-# include <stdlib.h>
 
-# define RETRY_TIMES 10
-# define RETRY_TIME 1
-# define RETRY_INTERVALS 20
-# define SERVER_READY SIGUSR1
-# define SERVER_BUSY SIGUSR2
-# define CHAR_0 SIGUSR1
-# define CHAR_1 SIGUSR2
-# define USAGE "Usage: ./client <server_pid> <message>"
-# define BAD_SIGNAL "Invalid server PID"
+# define RETRY_TIMES 		10
+# define RETRY_TIME 		1
+# define RETRY_INTERVALS 	20
+# define SERVER_READY		SIGUSR1
+# define SERVER_BUSY		SIGUSR2
+# define CHAR_0 			SIGUSR1
+# define CHAR_1 			SIGUSR2
+# define USAGE				"Usage: ./client <server_pid> <message>"
+# define BAD_SIGNAL			"Invalid server PID"
 
 typedef enum e_parser_result
 {
@@ -44,14 +39,14 @@ typedef struct s_client
 	pid_t	server_pid;
 	pid_t	client_pid;
 	char	*msg;
-}	t_client;
+}			t_client;
 
 typedef struct s_server_state
 {
 	pid_t	pid;
 	int		is_ready;
 	int		ready_to_proceed;
-}	t_server_state;
+}			t_server_state;
 
 /* Singleton functions */
 t_server_state	*get_server_instance(void);
@@ -70,5 +65,9 @@ void			send_message(char *str, t_client *data);
 void			init_data(char **argv, t_client *data);
 void			print_error_and_exit(t_parser_result result);
 int				ft_printf(const char *format, ...);
-
+void			handle_ping_response(int signum, t_server_state *server, pid_t pid);
+void			log_ping_attempt(int attempt, int max_attempts);
+void			log_ping_result(int attempt, int success);
+void			setup_ping_signals(struct sigaction *sa, sigset_t *sigset);
+void			ping_handler(int signum, siginfo_t *info, void *context);
 #endif
