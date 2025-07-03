@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:22:54 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 08:02:16 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 10:26:30 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,17 +130,19 @@ void	handle_header(int signum)
 	
 	if (client->sig_count < HEADER_SIZE)
 	{
-		client->msg.size_message |= (bit_value << (HEADER_SIZE - 1 - client->sig_count));
+		// Fix the bit position calculation
+		int bit_position = HEADER_SIZE - 1 - client->sig_count;
+		client->msg.size_message |= (bit_value << bit_position);
 		client->sig_count++;
-		log_msg(LOG_DEBUG, "Header bit %d/%d: %d (current size: %d)",
-			client->sig_count, HEADER_SIZE, bit_value, client->msg.size_message);
 		
-		// Debug: show the bit position calculation
+		log_msg(LOG_DEBUG, "Header bit %d/%d: %d (bit_pos: %d, current size: %d)",
+			client->sig_count, HEADER_SIZE, bit_value, bit_position, client->msg.size_message);
+		
+		// Debug: show the bit position calculation for first few bits
 		if (client->sig_count <= 5) // Show first 5 bits for debugging
 		{
-			int bit_pos = HEADER_SIZE - client->sig_count;
-			log_msg(LOG_DEBUG, "Bit position: %d, value: %d, result: %d", 
-				bit_pos, bit_value, (bit_value << bit_pos));
+			log_msg(LOG_DEBUG, "Bit position: %d, value: %d, shift result: %d", 
+				bit_position, bit_value, (bit_value << bit_position));
 		}
 	}
 	
@@ -152,8 +154,10 @@ void	handle_header(int signum)
 		if (client->msg.size_message <= 0 || client->msg.size_message > 10000000)
 		{
 			log_msg(LOG_ERROR, "Invalid message size: %d bytes", client->msg.size_message);
-			ft_printf("Error: Invalid message size received\n");
-			clean_global();
+			ft_printf("Error: Invalid message size received: %d\n", client->msg.size_message);
+			
+			// Don't clean global, just reset and continue
+			reset_client_state(client);
 			return ;
 		}
 		

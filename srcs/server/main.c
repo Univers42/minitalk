@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 07:57:45 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 10:26:28 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,18 +57,28 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 	client->client_pid = info->si_pid;
 	client->client_activity = 1;
 	client->sequence_number++;
+	
 	log_msg(LOG_DEBUG, "Processing signal %d from active client %d (seq: %d)", 
 		signum, client->client_pid, client->sequence_number);
+	log_msg(LOG_DEBUG, "Current state: getting_header=%d, getting_msg=%d, sig_count=%d", 
+		client->getting_header, client->getting_msg, client->sig_count);
 	
 	// Determine which handler to use based on current state
 	if (client->getting_msg == 1)
 	{
+		log_msg(LOG_DEBUG, "Routing to message handler");
 		handle_msg(signum);
+	}
+	else if (client->getting_header == 1)
+	{
+		log_msg(LOG_DEBUG, "Routing to header handler");
+		handle_header(signum);
 	}
 	else
 	{
-		// Handle message length in header handler
-		handle_header(signum);
+		log_msg(LOG_ERROR, "Invalid state: getting_header=%d, getting_msg=%d", 
+			client->getting_header, client->getting_msg);
+		return ;
 	}
 	
 	// Small delay to prevent signal flooding
