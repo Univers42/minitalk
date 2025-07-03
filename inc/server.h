@@ -42,6 +42,9 @@ typedef struct s_client_state
 	int			client_activity;
 	int			transmission_active;
 	int			queue_position;
+	int			sequence_number;
+	int			expected_checksum;
+	int			calculated_checksum;
 	t_message	msg;
 }	t_client_state;
 
@@ -76,4 +79,9 @@ void	handle_complete_message(t_client_state *client);
 int	check_client_disconnection(t_client_state *client);
 int	check_client_activity(t_client_state *client, int *i);
 void	handle_timeout(t_client_state *client, int i);
+
+/* Checksum functions */
+int				calculate_checksum(const char *data, int length);
+void			send_multiple_acks(pid_t client_pid);
+
 #endif

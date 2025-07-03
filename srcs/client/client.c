@@ -45,6 +45,22 @@ void	send_signal(pid_t pid, int signal)
 	log_msg(LOG_DEBUG, "Sent signal %s to server PID %d", signal_name, pid);
 }
 
+int	calculate_checksum(const char *data, int length)
+{
+	int	checksum;
+	int	i;
+
+	checksum = 0;
+	i = 0;
+	while (i < length)
+	{
+		checksum ^= data[i]; // Simple XOR checksum
+		checksum = (checksum << 1) | (checksum >> 31); // Rotate left
+		i++;
+	}
+	return (checksum);
+}
+
 void	wait_for_server_ack(void)
 {
 	t_server_state	*server;
@@ -55,7 +71,7 @@ void	wait_for_server_ack(void)
 	server = get_server_instance();
 	my_pid = getpid();
 	timeout_count = 0;
-	max_timeout = 600000; // 60 seconds for large messages
+	max_timeout = 100000; // 10 seconds - increased due to redundant server signals
 	
 	log_msg(LOG_DEBUG, "Waiting for server acknowledgment...");
 	while (!server->ready_to_proceed)
@@ -63,7 +79,7 @@ void	wait_for_server_ack(void)
 		usleep(100);
 		timeout_count++;
 		
-		// Check if we still own the transmission every 1000 iterations (100ms)
+		// Check transmission ownership every 100ms
 		if (timeout_count % 1000 == 0)
 		{
 			if (!is_transmission_owner(my_pid))
@@ -76,8 +92,8 @@ void	wait_for_server_ack(void)
 		if (timeout_count > max_timeout)
 		{
 			ft_printf("Error: Server acknowledgment timeout\n");
-			log_msg(LOG_ERROR, "Timeout waiting for server acknowledgment"
-				" after %d attempts", timeout_count);
+			log_msg(LOG_ERROR, "Timeout waiting for server acknowledgment after %d attempts", 
+				timeout_count);
 			end_transmission();
 			exit(EXIT_FAILURE);
 		}
@@ -155,8 +171,9 @@ void	send_signals(void *data, size_t bit_length, t_client *info)
 		value = *((unsigned char *)data);
 	else if (bit_length == 32)
 		value = *((unsigned int *)data);
-	log_msg(LOG_INFO, "Sending %zu-bit value: %llu (0x%llx)",
-		bit_length, value, value);
+	
+	log_msg(LOG_INFO, "Sending %zu-bit value: %llu (0x%llx)", bit_length, value, value);
+	
 	i = bit_length - 1;
 	while (i >= 0)
 	{

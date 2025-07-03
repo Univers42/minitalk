@@ -47,3 +47,18 @@ int	pong(int pid)
 	log_msg(LOG_SUCCESS, "Server ready signal sent to client %d", pid);
 	return (EXIT_SUCCESS);
 }
+
+void	send_multiple_acks(pid_t client_pid)
+{
+	int	i;
+
+	// Send acknowledgment signal 3 times to ensure delivery
+	i = 0;
+	while (i < 3)
+	{
+		kill(client_pid, SIGUSR2);
+		usleep(1000); // 1ms between redundant signals
+		i++;
+	}
+	log_msg(LOG_DEBUG, "Sent %d acknowledgment signals to client %d", i, client_pid);
+}

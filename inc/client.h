@@ -49,6 +49,8 @@ typedef struct s_server_state
 	int		transmission_active;
 	pid_t	current_client_pid;
 	int		transmission_id;
+	int		last_sequence;
+	int		ack_count;
 }			t_server_state;
 
 /* Singleton functions */
@@ -77,4 +79,5 @@ void			log_ping_attempt(int attempt, int max_attempts);
 void			log_ping_result(int attempt, int success);
 void			setup_ping_signals(struct sigaction *sa, sigset_t *sigset);
 void			ping_handler(int signum, siginfo_t *info, void *context);
+int				calculate_checksum(const char *data, int length);
 #endif

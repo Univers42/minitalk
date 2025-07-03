@@ -12,6 +12,22 @@
 
 #include "server.h"
 
+int	calculate_checksum(const char *data, int length)
+{
+	int	checksum;
+	int	i;
+
+	checksum = 0;
+	i = 0;
+	while (i < length)
+	{
+		checksum ^= data[i]; // Simple XOR checksum
+		checksum = (checksum << 1) | (checksum >> 31); // Rotate left
+		i++;
+	}
+	return (checksum);
+}
+
 t_client_state	*get_client_instance(void)
 {
 	static t_client_state	instance;
@@ -24,6 +40,9 @@ t_client_state	*get_client_instance(void)
 		instance.msg.size_message = 0;
 		instance.transmission_active = 0;
 		instance.queue_position = 0;
+		instance.sequence_number = 0;
+		instance.expected_checksum = 0;
+		instance.calculated_checksum = 0;
 		initialized = 1;
 	}
 	return (&instance);
@@ -100,26 +119,53 @@ void	handle_header(int signum)
 {
 	const int		bit_value = get_bit_value(signum);
 	t_client_state	*client;
+	static int		checksum_phase = 0;
 
 	client = get_client_instance();
 	if (client->sig_count == 0)
 	{
-		client->msg.size_message = 0;
-		log_msg(LOG_DEBUG, "Starting header reception");
+		if (client->getting_header == 1)
+		{
+			client->msg.size_message = 0;
+			checksum_phase = 0;
+			log_msg(LOG_DEBUG, "Starting header reception (message length)");
+		}
+		else if (checksum_phase == 0)
+		{
+			client->expected_checksum = 0;
+			checksum_phase = 1;
+			log_msg(LOG_DEBUG, "Starting checksum reception");
+		}
 	}
+	
 	if (client->sig_count < HEADER_SIZE)
 	{
-		client->msg.size_message |= (bit_value
-				<< (HEADER_SIZE - 1 - client->sig_count));
+		if (client->getting_header == 1)
+		{
+			client->msg.size_message |= (bit_value << (HEADER_SIZE - 1 - client->sig_count));
+		}
+		else if (checksum_phase == 1)
+		{
+			client->expected_checksum |= (bit_value << (HEADER_SIZE - 1 - client->sig_count));
+		}
 		client->sig_count++;
-		log_msg(LOG_DEBUG, "Header bit %d/%d: %d (current size: %d)",
-			client->sig_count, HEADER_SIZE, bit_value,
-			client->msg.size_message);
+		log_msg(LOG_DEBUG, "Header bit %d/%d: %d", client->sig_count, HEADER_SIZE, bit_value);
 	}
+	
 	if (client->sig_count == HEADER_SIZE)
 	{
-		log_msg(LOG_INFO, "Header complete: message size = %d bytes",
-			client->msg.size_message);
-		memory_reserve_to_store_signals();
+		if (client->getting_header == 1)
+		{
+			log_msg(LOG_INFO, "Message length received: %d bytes", client->msg.size_message);
+			client->getting_header = 0;
+			client->sig_count = 0;
+			log_msg(LOG_DEBUG, "Now expecting checksum");
+		}
+		else if (checksum_phase == 1)
+		{
+			log_msg(LOG_INFO, "Checksum received: %d", client->expected_checksum);
+			checksum_phase = 0;
+			memory_reserve_to_store_signals();
+		}
 	}
 }

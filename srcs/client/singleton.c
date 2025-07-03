@@ -14,7 +14,7 @@
 
 t_server_state	*get_server_instance(void)
 {
-	static t_server_state	server = {0, 0, 0, 0, 0, 0};
+	static t_server_state	server = {0, 0, 0, 0, 0, 0, 0, 0};
 
 	return (&server);
 }
@@ -30,6 +30,8 @@ void	reset_server_state(void)
 	server->transmission_active = 0;
 	server->current_client_pid = 0;
 	server->transmission_id = 0;
+	server->last_sequence = 0;
+	server->ack_count = 0;
 }
 
 void	set_transmission_active(pid_t client_pid)

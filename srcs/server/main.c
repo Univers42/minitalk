@@ -56,15 +56,18 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 	// Process signals only from the current active client
 	client->client_pid = info->si_pid;
 	client->client_activity = 1;
-	log_msg(LOG_DEBUG, "Processing signal %d from active client %d", signum, client->client_pid);
+	client->sequence_number++;
+	log_msg(LOG_DEBUG, "Processing signal %d from active client %d (seq: %d)", 
+		signum, client->client_pid, client->sequence_number);
 	
-	if (client->getting_header == 1)
+	// Handle both header (length + checksum) and message
+	if (client->getting_header == 1 || (client->getting_header == 0 && client->getting_msg == 0))
 		handle_header(signum);
 	else if (client->getting_msg == 1)
 		handle_msg(signum);
 	
-	// Send acknowledgment back to the active client only
-	kill(client->client_pid, SIGUSR2);
+	// Send multiple acknowledgment signals to ensure delivery
+	send_multiple_acks(client->client_pid);
 }
 
 int	main(void)
