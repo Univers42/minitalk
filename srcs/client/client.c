@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:11:03 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 10:30:00 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 10:32:32 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,15 +219,21 @@ void	send_signals(void *data, size_t bit_length, t_client *info)
 	{
 		log_msg(LOG_DEBUG, "32-bit breakdown: %d decimal = 0x%x hex", (int)value, (int)value);
 		
-		// Show binary representation bit by bit
+		// Show binary representation in groups of 8 bits
 		char binary_str[33];
 		int j = 0;
 		for (int debug_i = 31; debug_i >= 0; debug_i--)
 		{
 			binary_str[j++] = (value & (1ULL << debug_i)) ? '1' : '0';
+			if (debug_i % 8 == 0 && debug_i > 0)
+				binary_str[j++] = ' ';
 		}
-		binary_str[32] = '\0';
+		binary_str[j] = '\0';
 		log_msg(LOG_DEBUG, "Binary: %s", binary_str);
+		
+		// Verify the value we're actually about to send
+		log_msg(LOG_DEBUG, "Verifying: raw value = %u, cast to int = %d", 
+			(unsigned int)value, (int)value);
 	}
 	
 	i = bit_length - 1;

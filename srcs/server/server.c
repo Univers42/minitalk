@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:22:54 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 10:29:59 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 10:32:33 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,26 +134,31 @@ void	handle_header(int signum)
 		// Calculate bit position: MSB first (31, 30, 29, ..., 0)
 		bit_position = HEADER_SIZE - 1 - client->sig_count;
 		
-		if (bit_value)
-			client->msg.size_message |= (1 << bit_position);
-		
-		log_msg(LOG_DEBUG, "Header bit %d/%d: %d (bit_pos: %d, current size: %d)",
-			client->sig_count + 1, HEADER_SIZE, bit_value, bit_position, client->msg.size_message);
+		// Only set the bit if bit_value is 1, don't OR with bit_value directly
+		if (bit_value == 1)
+		{
+			client->msg.size_message |= (1U << bit_position);
+		}
 		
 		client->sig_count++;
 		
+		log_msg(LOG_DEBUG, "Header bit %d/%d: %d (bit_pos: %d, current size: %u)",
+			client->sig_count, HEADER_SIZE, bit_value, bit_position, 
+			(unsigned int)client->msg.size_message);
+		
 		// Debug: show the calculation for first few bits
-		if (client->sig_count <= 5)
+		if (client->sig_count <= 8)
 		{
-			log_msg(LOG_DEBUG, "Bit position: %d, value: %d, mask: 0x%x", 
-				bit_position, bit_value, bit_value ? (1 << bit_position) : 0);
+			log_msg(LOG_DEBUG, "Bit position: %d, value: %d, mask: 0x%x, size so far: %u", 
+				bit_position, bit_value, bit_value ? (1U << bit_position) : 0,
+				(unsigned int)client->msg.size_message);
 		}
 	}
 	
 	if (client->sig_count == HEADER_SIZE)
 	{
 		log_msg(LOG_INFO, "Header complete: message size = %d bytes (0x%x)", 
-			client->msg.size_message, client->msg.size_message);
+			client->msg.size_message, (unsigned int)client->msg.size_message);
 		
 		// Validate message size
 		if (client->msg.size_message <= 0 || client->msg.size_message > 10000000)
