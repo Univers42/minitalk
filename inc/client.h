@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:19:45 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 07:08:00 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 15:20:33 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,11 @@ int				ping(int pid);
 void			send_signals(void *data, size_t bit_length, t_client *info);
 void			send_message(char *str, t_client *data);
 void			wait_for_transmission_slot(t_client *data);
+int				connect_to_server(t_client *data);
+void			setup_signal_handlers(sigset_t *sigset, struct sigaction *sa);
+void			start_transmission(t_client *data, int msg_len);
+int				check_server_and_sleep(void);
+int				handle_timeouts(int pid);
 
 /* Utility functions */
 void			init_data(char **argv, t_client *data);

@@ -6,24 +6,43 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 10:36:23 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 13:21:43 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.h"
 
-static int	lost_signal(int s_si_pid, int signum, void *context)
+static int	handle_new_client(t_client_state *client, siginfo_t *info)
 {
-	t_client_state	*client;
-
-	(void)context;
-	client = get_client_instance();
-	if (s_si_pid == 0 && (signum == SIGUSR1 || signum == SIGUSR2))
+	if (client->actual_pid == 0)
 	{
-		ft_printf("client: %d with signal: %d\n", s_si_pid, signum);
-		s_si_pid = client->actual_pid;
+		log_msg(LOG_INFO, "New client connection from PID %d", info->si_pid);
+		client->client_pid = info->si_pid;
+		return (pong(client->client_pid), 1);
 	}
-	return (s_si_pid);
+	return (0);
+}
+
+static int	handle_busy_server(t_client_state *client, siginfo_t *info)
+{
+	if (client->actual_pid != info->si_pid)
+	{
+		log_msg(LOG_WARNING, "Server busy, rejecting signal"
+			" from PID %d (current client: %d)",
+			info->si_pid, client->actual_pid);
+		kill(info->si_pid, SERVER_BUSY);
+		return (1);
+	}
+	return (0);
+}
+
+static void	process_data_signal(t_client_state *client, int signum)
+{
+	if (client->getting_msg == 1)
+		handle_msg(signum);
+	else if (client->getting_header == 1)
+		handle_header(signum);
+	send_multiple_acks(client->client_pid);
 }
 
 void	signal_handler(int signum, siginfo_t *info, void *context)
@@ -34,39 +53,15 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 	info->si_pid = lost_signal(info->si_pid, signum, context);
 	if (info->si_pid == getpid())
 		return ;
-	
-	// Handle new client connection (ping) when server is idle
-	if (client->actual_pid == 0)
-	{
-		log_msg(LOG_INFO, "New client connection from PID %d", info->si_pid);
-		client->client_pid = info->si_pid;
-		pong(client->client_pid);
+	if (handle_new_client(client, info))
 		return ;
-	}
-	
-	// If server is busy with another client, reject the signal immediately
-	if (client->actual_pid != info->si_pid)
-	{
-		log_msg(LOG_WARNING, "Server busy, rejecting signal from PID %d (current client: %d)", 
-			info->si_pid, client->actual_pid);
-		kill(info->si_pid, SERVER_BUSY);
+	if (handle_busy_server(client, info))
 		return ;
-	}
-	
-	// Process signals only from the current active client
 	client->client_pid = info->si_pid;
 	client->client_activity = 1;
-	log_msg(LOG_DEBUG, "Processing signal %d from active client %d", 
+	log_msg(LOG_DEBUG, "Processing signal %d from active client %d",
 		signum, client->client_pid);
-	
-	// Simple routing based on state
-	if (client->getting_msg == 1)
-		handle_msg(signum);
-	else if (client->getting_header == 1)
-		handle_header(signum);
-	
-	// Send single acknowledgment signal
-	send_multiple_acks(client->client_pid);
+	process_data_signal(client, signum);
 }
 
 int	main(void)

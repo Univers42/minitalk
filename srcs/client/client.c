@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:11:03 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 10:36:08 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 15:18:11 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,15 +36,12 @@ void	send_signal(pid_t pid, int signal)
 		signal_name = "SIGUSR1 (0)";
 	else
 		signal_name = "SIGUSR2 (1)";
-	
-	// First check if process exists
 	if (kill(pid, 0) == -1)
 	{
 		ft_printf("Error: Server process PID %d no longer exists\n", pid);
 		log_msg(LOG_ERROR, "Server process PID %d disappeared", pid);
 		exit(EXIT_FAILURE);
 	}
-	
 	if (kill(pid, signal) == -1)
 	{
 		ft_printf("Error: Signal sending failed\n");
@@ -63,11 +60,36 @@ int	calculate_checksum(const char *data, int length)
 	i = 0;
 	while (i < length)
 	{
-		checksum ^= data[i]; // Simple XOR checksum
-		checksum = (checksum << 1) | (checksum >> 31); // Rotate left
+		checksum ^= data[i];
+		checksum = (checksum << 1) | (checksum >> 31);
 		i++;
 	}
 	return (checksum);
+}
+
+static int	check_transmission_ownership(void)
+{
+	pid_t			my_pid;
+
+	my_pid = getpid();
+	
+	if (!is_transmission_owner(my_pid))
+	{
+		log_msg(LOG_ERROR, "Lost transmission ownership while waiting for ACK");
+		exit(EXIT_FAILURE);
+	}
+	return (1);
+}
+
+static int	handle_timeout(int timeout_count, int max_timeout)
+{
+	if (timeout_count > max_timeout)
+	{
+		ft_printf("Error: Server acknowledgment timeout\n");
+		log_msg(LOG_ERROR, "Timeout waiting for server acknowledgment");
+		exit(EXIT_FAILURE);
+	}
+	return (0);
 }
 
 void	wait_for_server_ack(void)
@@ -86,12 +108,11 @@ void	wait_for_server_ack(void)
 		usleep(100);
 		timeout_count++;
 		
-		if (timeout_count > max_timeout)
-		{
-			ft_printf("Error: Server acknowledgment timeout\n");
-			log_msg(LOG_ERROR, "Timeout waiting for server acknowledgment");
-			exit(EXIT_FAILURE);
-		}
+		// Only check ownership every 5 seconds, not every 100ms
+		if (timeout_count % 50000 == 0)
+			check_transmission_ownership();
+		
+		handle_timeout(timeout_count, max_timeout);
 	}
 	server->ready_to_proceed = 0;
 	log_msg(LOG_DEBUG, "Server acknowledgment received");
@@ -103,68 +124,56 @@ void	wait_for_transmission_slot(t_client *data)
 	int				wait_count;
 	pid_t			my_pid;
 
-	(void)data; // Mark parameter as unused
+	(void)data;
 	server = get_server_instance();
 	my_pid = getpid();
 	wait_count = 0;
-	
 	log_msg(LOG_INFO, "Waiting for transmission slot...");
+	if (!server->transmission_active || is_transmission_owner(my_pid))
+	{
+		set_transmission_active(my_pid);
+		log_msg(LOG_SUCCESS, "Transmission slot acquired");
+		return ;
+	}
 	while (server->transmission_active && !is_transmission_owner(my_pid))
 	{
-		usleep(10000); // 10ms
+		usleep(10000);
 		wait_count++;
-		
-		// Re-ping server every 30 seconds to check availability
 		if (wait_count % 3000 == 0)
 		{
-			log_msg(LOG_INFO, "Still waiting for transmission slot (waited %d seconds)", 
-				wait_count / 100);
-			
-			// Check if server process still exists
+			log_msg(LOG_INFO, "Still waiting for transmission slot");
 			if (kill(server->pid, 0) == -1)
 			{
-				ft_printf("Error: Server process PID %d no longer exists\n", server->pid);
-				log_msg(LOG_ERROR, "Server process disappeared while waiting");
-				exit(EXIT_FAILURE);
-			}
-			
-			if (kill(server->pid, SIGUSR1) == -1)
-			{
-				log_msg(LOG_ERROR, "Server appears to be down");
+				ft_printf("Error: Server process no longer exists\n");
 				exit(EXIT_FAILURE);
 			}
 		}
-		
-		// Maximum wait time: 10 minutes
 		if (wait_count > 60000)
 		{
 			ft_printf("Error: Transmission slot timeout\n");
-			log_msg(LOG_ERROR, "Timeout waiting for transmission slot");
 			exit(EXIT_FAILURE);
 		}
 	}
-	
-	// Claim the transmission slot
 	set_transmission_active(my_pid);
 	log_msg(LOG_SUCCESS, "Transmission slot acquired");
+}
+
+static void	send_data_bit(int bit_value, t_client *info)
+{
+	if (bit_value)
+		send_signal(info->server_pid, CHAR_1);
+	else
+		send_signal(info->server_pid, CHAR_0);
 }
 
 void	send_bit(unsigned long long value, int i, t_client *info)
 {
 	int	bit_value;
 
-	bit_value = 0;
-	if (value & (1ULL << i))
-		bit_value = 1;
+	bit_value = (value & (1ULL << i)) ? 1 : 0;
 	
 	log_msg(LOG_DEBUG, "Sending bit %d: %d", i, bit_value);
-	
-	// Simple signal sending - no retries
-	if (bit_value)
-		send_signal(info->server_pid, CHAR_1);
-	else
-		send_signal(info->server_pid, CHAR_0);
-	
+	send_data_bit(bit_value, info);
 	wait_for_server_ack();
 }
 

@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:22:54 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 10:32:33 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 13:32:24 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@ int	calculate_checksum(const char *data, int length)
 	i = 0;
 	while (i < length)
 	{
-		checksum ^= data[i]; // Simple XOR checksum
-		checksum = (checksum << 1) | (checksum >> 31); // Rotate left
+		checksum ^= data[i];
+		checksum = (checksum << 1) | (checksum >> 31);
 		i++;
 	}
 	return (checksum);
@@ -115,6 +115,7 @@ void	memory_reserve_to_store_signals(void)
 		"switching to message reception mode");
 }
 
+// Calculate bit position: MSB first (31, 30, 29, ..., 0)
 void	handle_header(int signum)
 {
 	const int		bit_value = get_bit_value(signum);
@@ -122,31 +123,20 @@ void	handle_header(int signum)
 	int				bit_position;
 
 	client = get_client_instance();
-	
 	if (client->sig_count == 0)
 	{
 		client->msg.size_message = 0;
 		log_msg(LOG_DEBUG, "Starting header reception (message length)");
 	}
-	
 	if (client->sig_count < HEADER_SIZE)
 	{
-		// Calculate bit position: MSB first (31, 30, 29, ..., 0)
 		bit_position = HEADER_SIZE - 1 - client->sig_count;
-		
-		// Only set the bit if bit_value is 1, don't OR with bit_value directly
 		if (bit_value == 1)
-		{
 			client->msg.size_message |= (1U << bit_position);
-		}
-		
 		client->sig_count++;
-		
 		log_msg(LOG_DEBUG, "Header bit %d/%d: %d (bit_pos: %d, current size: %u)",
 			client->sig_count, HEADER_SIZE, bit_value, bit_position, 
 			(unsigned int)client->msg.size_message);
-		
-		// Debug: show the calculation for first few bits
 		if (client->sig_count <= 8)
 		{
 			log_msg(LOG_DEBUG, "Bit position: %d, value: %d, mask: 0x%x, size so far: %u", 
@@ -154,23 +144,17 @@ void	handle_header(int signum)
 				(unsigned int)client->msg.size_message);
 		}
 	}
-	
 	if (client->sig_count == HEADER_SIZE)
 	{
 		log_msg(LOG_INFO, "Header complete: message size = %d bytes (0x%x)", 
 			client->msg.size_message, (unsigned int)client->msg.size_message);
-		
-		// Validate message size
 		if (client->msg.size_message <= 0 || client->msg.size_message > 10000000)
 		{
 			log_msg(LOG_ERROR, "Invalid message size: %d bytes", client->msg.size_message);
 			ft_printf("Error: Invalid message size received: %d\n", client->msg.size_message);
-			
-			// Reset and continue
 			reset_client_state(client);
 			return ;
 		}
-		
 		memory_reserve_to_store_signals();
 	}
 }
