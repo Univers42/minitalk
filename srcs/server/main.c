@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
+/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/02 19:00:00 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/03 02:53:36 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,24 +33,20 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 	client = get_client_instance();
 	info->si_pid = lost_signal(info->si_pid, signum, context);
 	if (info->si_pid == getpid())
-	{
-		return;
-	}
+		return ;
 	client->client_pid = info->si_pid;
 	if (client->actual_pid == 0)
 	{
-		log_msg(LOG_INFO, "New client connection from PID %d", client->client_pid);
-		pong(client->client_pid);
+		log_msg(LOG_INFO, "New client connection from PID %d",
+				client->client_pid), pong(client->client_pid);
 		return ;
 	}
 	if (client->actual_pid != client->client_pid)
-	{
-		log_msg(LOG_WARNING, "Signal from unexpected PID %d (expected %d)", 
-			client->client_pid, client->actual_pid);
-		return ;
-	}
+		(log_msg(LOG_WARNING, "Signal from unexpected PID %d"
+				" (expected %d)", client->client_pid, client->actual_pid));
 	client->client_activity = 1;
-	log_msg(LOG_DEBUG, "Processing signal %d from client %d", signum, client->client_pid);
+	log_msg(LOG_DEBUG, "Processing signal %d from client %d",
+		signum, client->client_pid);
 	if (client->getting_header == 1)
 		handle_header(signum);
 	else if (client->getting_msg == 1)

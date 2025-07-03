@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
+/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:19:40 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 01:02:23 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/03 03:15:26 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,5 +63,11 @@ void			clean_global(void);
 int				ft_printf(const char *format, ...);
 void			*ft_memset(void *s, int c, size_t n);
 void			ft_bzero(void *s, size_t n);
-
+int		get_bit_value(int signum);
+void	process_character(t_client_state *client, int bit_value, int bit_pos);
+void	print_message(t_client_state *client);
+void	handle_complete_message(t_client_state *client);
+int	check_client_disconnection(t_client_state *client);
+int	check_client_activity(t_client_state *client, int *i);
+void	handle_timeout(t_client_state *client, int i);
 #endif

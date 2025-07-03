@@ -1,0 +1,74 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ping_utils.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/07/03 03:15:33 by codespace         #+#    #+#             */
+/*   Updated: 2025/07/03 03:26:31 by codespace        ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "client.h"
+
+void	handle_ping_response(int signum, t_server_state *server, pid_t pid)
+{
+	if (signum == SIGUSR1)
+	{
+		server->is_ready = 1;
+		log_msg(LOG_SUCCESS, "Server ready signal received from PID %d",
+			pid);
+	}
+	if (signum == SIGUSR2)
+	{
+		server->is_ready = 0;
+		log_msg(LOG_INFO, "Server busy signal received from PID %d",
+			pid);
+	}
+}
+
+void	log_ping_attempt(int attempt, int max_attempts)
+{
+	log_msg(LOG_DEBUG, "Sending ping signal %d/%d to server",
+		attempt, max_attempts);
+	log_msg(LOG_INFO, "Waiting for server response (attempt %d/%d)",
+		attempt, max_attempts);
+}
+
+void	log_ping_result(int attempt, int success)
+{
+	if (success)
+		log_msg(LOG_SUCCESS, "Server responded on attempt %d", attempt);
+	else
+		log_msg(LOG_WARNING, "No response on attempt %d, retrying...", attempt);
+}
+
+void	setup_ping_signals(struct sigaction *sa, sigset_t *sigset)
+{
+	sigemptyset(sigset);
+	sigaddset(sigset, SIGUSR1);
+	sigaddset(sigset, SIGUSR2);
+	sa->sa_flags = SA_SIGINFO;
+	sa->sa_sigaction = ping_handler;
+	sa->sa_mask = *sigset;
+	sigaction(SIGUSR1, sa, NULL);
+	sigaction(SIGUSR2, sa, NULL);
+}
+
+void	send_message(char *str, t_client *data)
+{
+	int	i;
+
+	i = 0;
+	log_msg(LOG_INFO, "Starting message transmission: \"%s\"", str);
+	while (str[i])
+	{
+		log_msg(LOG_DEBUG, "Sending character %d: '%c' (ASCII: %d)",
+			i + 1, str[i], str[i]);
+		send_signals(&str[i], 8, data);
+		i++;
+	}
+	log_msg(LOG_SUCCESS, "Message transmission complete:"
+		" %d characters sent", i);
+}

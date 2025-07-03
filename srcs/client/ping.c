@@ -1,11 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ping.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/07/03 02:15:33 by codespace         #+#    #+#             */
+/*   Updated: 2025/07/03 03:27:46 by codespace        ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "client.h"
-
-#define RETRY_TIMES 10
-#define RETRY_TIME 1
-#define RETRY_INTERVALS 20
-
-#define SERVER_READY SIGUSR1
-#define SERVER_BUSY SIGUSR2
 
 void	ping_handler(int signum, siginfo_t *info, void *context)
 {
@@ -14,10 +19,12 @@ void	ping_handler(int signum, siginfo_t *info, void *context)
 
 	(void)context;
 	server = get_server_instance();
-	signal_name = (signum == SIGUSR1) ? "SIGUSR1 (READY)" : "SIGUSR2 (BUSY)";
-	
-	log_msg(LOG_DEBUG, "Ping handler received %s from PID %d", signal_name, info->si_pid);
-	
+	if (signum == SIGUSR1)
+		signal_name = "SIGUSR1 (READY)";
+	else
+		signal_name = "SIGUSR2 (BUSY)";
+	log_msg(LOG_DEBUG, "Ping handler received %s from PID %d",
+		signal_name, info->si_pid);
 	if (info->si_pid == getpid())
 	{
 		log_msg(LOG_ERROR, "Received signal from own process");
@@ -25,19 +32,11 @@ void	ping_handler(int signum, siginfo_t *info, void *context)
 	}
 	if (server->pid != 0 && info->si_pid != server->pid)
 	{
-		log_msg(LOG_WARNING, "Unexpected PID in ping_handler: %d (expected %d)", info->si_pid, server->pid);
-		return;
+		log_msg(LOG_WARNING, "Unexpected PID in ping_handler: %d (expected %d)",
+			info->si_pid, server->pid);
+		return ;
 	}
-	if (signum == SERVER_READY)
-	{
-		server->is_ready = 1;
-		log_msg(LOG_SUCCESS, "Server ready signal received from PID %d", info->si_pid);
-	}
-	if (signum == SERVER_BUSY)
-	{
-		server->is_ready = 0;
-		log_msg(LOG_INFO, "Server busy signal received from PID %d", info->si_pid);
-	}
+	handle_ping_response(signum, server, info->si_pid);
 }
 
 int	check_server_and_sleep(void)
@@ -67,15 +66,14 @@ int	handle_timeouts(int pid)
 	log_msg(LOG_INFO, "Starting ping sequence to server PID %d", pid);
 	while (++i <= RETRY_TIMES)
 	{
-		log_msg(LOG_DEBUG, "Sending ping signal %d/%d to server", i, RETRY_TIMES);
+		log_ping_attempt(i, RETRY_TIMES);
 		kill(pid, SIGUSR1);
-		log_msg(LOG_INFO, "Waiting for server response (attempt %d/%d)", i, RETRY_TIMES);
 		if (check_server_and_sleep())
 		{
-			log_msg(LOG_SUCCESS, "Server responded on attempt %d", i);
+			log_ping_result(i, 1);
 			return (0);
 		}
-		log_msg(LOG_WARNING, "No response on attempt %d, retrying...", i);
+		log_ping_result(i, 0);
 	}
 	log_msg(LOG_ERROR, "Server did not respond after %d attempts", RETRY_TIMES);
 	return (1);
@@ -88,14 +86,7 @@ int	ping(int pid)
 	t_server_state		*server;
 
 	server = get_server_instance();
-	sigemptyset(&sigset);
-	sigaddset(&sigset, SIGUSR1);
-	sigaddset(&sigset, SIGUSR2);
-	sa.sa_flags = SA_SIGINFO;
-	sa.sa_sigaction = ping_handler;
-	sa.sa_mask = sigset;
-	sigaction(SIGUSR1, &sa, NULL);
-	sigaction(SIGUSR2, &sa, NULL);
+	setup_ping_signals(&sa, &sigset);
 	server->pid = pid;
 	server->is_ready = 0;
 	if (handle_timeouts(pid))
