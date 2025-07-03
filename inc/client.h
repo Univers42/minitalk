@@ -72,4 +72,3 @@ void			print_error_and_exit(t_parser_result result);
 int				ft_printf(const char *format, ...);
 
 #endif
-

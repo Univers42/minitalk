@@ -19,9 +19,12 @@
 
 // Note: Color definitions are provided by libft/render/ft_colors.h
 
-typedef char		t_buffer[1024];
+typedef char			t_buffer[1024];
+typedef t_format_state	(*t_state_action)(t_parser_ctx *ctx, char c);
+typedef void			(*t_flag_action)(t_format_spec *spec);
+typedef void			(*t_spec_action)(t_parser_ctx *ctx);
 
-typedef enum
+typedef enum s_log_level
 {
 	LOG_INFO,
 	LOG_WARNING,
@@ -42,7 +45,7 @@ typedef enum
 # define CHAR_PERCENT       0x20
 # define STATE_COUNT        8
 
-typedef enum 
+typedef enum s_format_state
 {
 	STATE_NORMAL,
 	STATE_PERCENT,
@@ -79,10 +82,6 @@ typedef struct s_parser_ctx
 	int						*pos;
 	struct s_parser_tables	*tables;
 }	t_parser_ctx;
-
-typedef t_format_state (*t_state_action)(t_parser_ctx *ctx, char c);
-typedef void (*t_flag_action)(t_format_spec *spec);
-typedef void (*t_spec_action)(t_parser_ctx *ctx);
 
 typedef struct s_parser_tables
 {
@@ -123,21 +122,25 @@ void			spec_pointer(t_parser_ctx *ctx);
 
 void			buffer_append_char(t_buffer buffer, int *pos, char c);
 void			buffer_append_str(t_buffer buffer, int *pos, const char *str);
-void			buffer_append_str_formatted(t_buffer buffer, int *pos, 
+void			buffer_append_str_formatted(t_buffer buffer, int *pos,
 					const char *str, t_format_spec *spec);
-void			buffer_append_int_formatted(t_buffer buffer, int *pos, 
+void			buffer_append_int_formatted(t_buffer buffer, int *pos,
 					long num, t_format_spec *spec, int base);
-void			put_level_buffered(t_buffer buffer, int *pos, t_log_level level);
+void			put_level_buffered(t_buffer buffer, int *pos,
+					t_log_level level);
 void			log_msg(t_log_level level, const char *fmt, ...);
-void			vlog_msg_automata(const char *fmt, va_list args, 
+void			vlog_msg_automata(const char *fmt, va_list args,
 					t_buffer buffer, int *pos);
 
 t_parser_tables	*get_parser_tables(void);
 
 // Additional function declarations for new files
 int				verify_buffer_integrity(t_buffer buffer, int pos);
-int				safe_buffer_append(t_buffer buffer, int *pos, const char *str, int len);
-int				convert_number_to_string(char *dest, long num, int base, int uppercase);
-int				format_with_precision(char *dest, const char *src, t_format_spec *spec);
+int				safe_buffer_append(t_buffer buffer, int *pos,
+					const char *str, int len);
+int				convert_number_to_string(char *dest, long num,
+					int base, int uppercase);
+int				format_with_precision(char *dest, const char *src,
+					t_format_spec *spec);
 
 #endif
