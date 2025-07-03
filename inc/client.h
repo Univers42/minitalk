@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:19:45 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 04:33:54 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 05:01:11 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,9 @@
 # include "libft.h"
 # include "auto_parser.h"
 
-# define RETRY_TIMES 		10
+# define RETRY_TIMES 		20
 # define RETRY_TIME 		1
-# define RETRY_INTERVALS 	20
+# define RETRY_INTERVALS 	100
 # define SERVER_READY		SIGUSR1
 # define SERVER_BUSY		SIGUSR2
 # define CHAR_0 			SIGUSR1
