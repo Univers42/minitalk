@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 07:01:21 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 07:17:30 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,11 +45,15 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 	
 	if (signum == SIGUSR2)
 	{
-		// Server acknowledgment - set ready flag (handle multiple)
+		// Server acknowledgment - only set if not already set
 		if (!server->ready_to_proceed)
 		{
 			server->ready_to_proceed = 1;
 			log_msg(LOG_DEBUG, "Server ready to receive next bit");
+		}
+		else
+		{
+			log_msg(LOG_DEBUG, "Ignoring duplicate acknowledgment");
 		}
 	}
 	else if (signum == SIGUSR1)

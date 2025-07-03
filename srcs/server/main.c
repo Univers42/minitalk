@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 04:48:32 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 07:17:29 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,13 +60,13 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 	log_msg(LOG_DEBUG, "Processing signal %d from active client %d (seq: %d)", 
 		signum, client->client_pid, client->sequence_number);
 	
-	// Handle both header (length + checksum) and message
+	// Handle header (length + checksum) and message
 	if (client->getting_header == 1 || (client->getting_header == 0 && client->getting_msg == 0))
 		handle_header(signum);
 	else if (client->getting_msg == 1)
 		handle_msg(signum);
 	
-	// Send multiple acknowledgment signals to ensure delivery
+	// Send single acknowledgment signal
 	send_multiple_acks(client->client_pid);
 }
 

@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:11:03 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 04:48:33 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 07:17:30 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ void	wait_for_server_ack(void)
 	server = get_server_instance();
 	my_pid = getpid();
 	timeout_count = 0;
-	max_timeout = 100000; // 10 seconds - increased due to redundant server signals
+	max_timeout = 50000; // 5 seconds - reduced timeout
 	
 	log_msg(LOG_DEBUG, "Waiting for server acknowledgment...");
 	while (!server->ready_to_proceed)

@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:22:54 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 04:33:55 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 07:17:27 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,6 @@ void	handle_header(int signum)
 {
 	const int		bit_value = get_bit_value(signum);
 	t_client_state	*client;
-	static int		checksum_phase = 0;
 
 	client = get_client_instance();
 	if (client->sig_count == 0)
@@ -127,13 +126,11 @@ void	handle_header(int signum)
 		if (client->getting_header == 1)
 		{
 			client->msg.size_message = 0;
-			checksum_phase = 0;
 			log_msg(LOG_DEBUG, "Starting header reception (message length)");
 		}
-		else if (checksum_phase == 0)
+		else
 		{
 			client->expected_checksum = 0;
-			checksum_phase = 1;
 			log_msg(LOG_DEBUG, "Starting checksum reception");
 		}
 	}
@@ -144,7 +141,7 @@ void	handle_header(int signum)
 		{
 			client->msg.size_message |= (bit_value << (HEADER_SIZE - 1 - client->sig_count));
 		}
-		else if (checksum_phase == 1)
+		else
 		{
 			client->expected_checksum |= (bit_value << (HEADER_SIZE - 1 - client->sig_count));
 		}
@@ -161,10 +158,9 @@ void	handle_header(int signum)
 			client->sig_count = 0;
 			log_msg(LOG_DEBUG, "Now expecting checksum");
 		}
-		else if (checksum_phase == 1)
+		else
 		{
 			log_msg(LOG_INFO, "Checksum received: %d", client->expected_checksum);
-			checksum_phase = 0;
 			memory_reserve_to_store_signals();
 		}
 	}
