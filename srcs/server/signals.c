@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 07:57:45 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 10:36:09 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,16 +50,7 @@ int	pong(int pid)
 
 void	send_multiple_acks(pid_t client_pid)
 {
-	int	i;
-
-	// Send acknowledgment signal 3 times with small delays to ensure delivery
-	i = 0;
-	while (i < 3)
-	{
-		kill(client_pid, SIGUSR2);
-		if (i < 2) // Don't sleep after the last signal
-			usleep(500); // 0.5ms between redundant signals
-		i++;
-	}
-	log_msg(LOG_DEBUG, "Sent %d acknowledgment signals to client %d", i, client_pid);
+	// Send only one acknowledgment signal - simple and reliable
+	kill(client_pid, SIGUSR2);
+	log_msg(LOG_DEBUG, "Sent acknowledgment signal to client %d", client_pid);
 }

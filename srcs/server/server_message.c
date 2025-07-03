@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/03 03:25:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 10:32:32 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 10:36:30 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,23 +22,10 @@ void	print_message(t_client_state *client)
 void	handle_complete_message(t_client_state *client)
 {
 	pid_t	client_pid;
-	int		actual_checksum;
 
 	client->msg.message[client->msg_pos] = '\0';
 	
-	// Calculate checksum of received message
-	actual_checksum = calculate_checksum(client->msg.message, client->msg_pos);
-	
 	log_msg(LOG_SUCCESS, "Message reception complete: %d characters received", client->msg_pos);
-	log_msg(LOG_DEBUG, "Message checksum: calculated=%d, expected=%d", 
-		actual_checksum, client->expected_checksum);
-	
-	// Validate checksum if it was provided
-	if (client->expected_checksum != 0 && actual_checksum != client->expected_checksum)
-	{
-		log_msg(LOG_ERROR, "Checksum mismatch! Message may be corrupted");
-		ft_printf("Warning: Message checksum failed - data may be corrupted\n");
-	}
 	
 	print_message(client);
 	client_pid = client->client_pid;
@@ -50,15 +37,10 @@ void	handle_complete_message(t_client_state *client)
 		client->msg.message = NULL;
 	}
 	
-	// Send multiple completion signals to ensure delivery
+	// Send simple completion signal
 	if (client_pid > 0)
 	{
 		log_msg(LOG_INFO, "Sending completion signal to client %d", client_pid);
-		// Send completion signal multiple times
-		kill(client_pid, SIGUSR1);
-		usleep(1000);
-		kill(client_pid, SIGUSR1);
-		usleep(1000);
 		kill(client_pid, SIGUSR1);
 	}
 	

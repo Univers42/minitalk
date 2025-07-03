@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:11:03 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 10:32:32 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 10:36:08 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,12 +75,10 @@ void	wait_for_server_ack(void)
 	t_server_state	*server;
 	int				timeout_count;
 	int				max_timeout;
-	pid_t			my_pid;
 
 	server = get_server_instance();
-	my_pid = getpid();
 	timeout_count = 0;
-	max_timeout = 100000; // 10 seconds - increased timeout for multiple acks
+	max_timeout = 50000; // 5 seconds
 	
 	log_msg(LOG_DEBUG, "Waiting for server acknowledgment...");
 	while (!server->ready_to_proceed)
@@ -88,28 +86,15 @@ void	wait_for_server_ack(void)
 		usleep(100);
 		timeout_count++;
 		
-		// Check transmission ownership every 100ms
-		if (timeout_count % 1000 == 0)
-		{
-			if (!is_transmission_owner(my_pid))
-			{
-				log_msg(LOG_ERROR, "Lost transmission ownership while waiting for ACK");
-				exit(EXIT_FAILURE);
-			}
-		}
-		
 		if (timeout_count > max_timeout)
 		{
 			ft_printf("Error: Server acknowledgment timeout\n");
-			log_msg(LOG_ERROR, "Timeout waiting for server acknowledgment after %d attempts", 
-				timeout_count);
-			end_transmission();
+			log_msg(LOG_ERROR, "Timeout waiting for server acknowledgment");
 			exit(EXIT_FAILURE);
 		}
 	}
 	server->ready_to_proceed = 0;
-	log_msg(LOG_DEBUG, "Server acknowledgment received after %d microseconds",
-		timeout_count * 100);
+	log_msg(LOG_DEBUG, "Server acknowledgment received");
 }
 
 void	wait_for_transmission_slot(t_client *data)
@@ -166,39 +151,21 @@ void	wait_for_transmission_slot(t_client *data)
 
 void	send_bit(unsigned long long value, int i, t_client *info)
 {
-	int		bit_value;
-	int		retry_count;
-	int		max_retries;
+	int	bit_value;
 
 	bit_value = 0;
-	retry_count = 0;
-	max_retries = 3;
-	
 	if (value & (1ULL << i))
 		bit_value = 1;
 	
 	log_msg(LOG_DEBUG, "Sending bit %d: %d", i, bit_value);
 	
-	// Retry loop for signal sending
-	while (retry_count < max_retries)
-	{
-		// Send the signal
-		if (bit_value)
-			send_signal(info->server_pid, CHAR_1);
-		else
-			send_signal(info->server_pid, CHAR_0);
-		
-		// Wait for acknowledgment with timeout
-		wait_for_server_ack();
-		
-		// If we got here, acknowledgment was received successfully
-		return ;
-	}
+	// Simple signal sending - no retries
+	if (bit_value)
+		send_signal(info->server_pid, CHAR_1);
+	else
+		send_signal(info->server_pid, CHAR_0);
 	
-	// If we reach here, all retries failed
-	ft_printf("Error: Failed to send bit after %d retries\n", max_retries);
-	log_msg(LOG_ERROR, "Bit transmission failed after %d retries", max_retries);
-	exit(EXIT_FAILURE);
+	wait_for_server_ack();
 }
 
 void	send_signals(void *data, size_t bit_length, t_client *info)
@@ -213,28 +180,6 @@ void	send_signals(void *data, size_t bit_length, t_client *info)
 		value = *((unsigned int *)data);
 	
 	log_msg(LOG_INFO, "Sending %zu-bit value: %llu (0x%llx)", bit_length, value, value);
-	
-	// Additional debug for 32-bit values (message length)
-	if (bit_length == 32)
-	{
-		log_msg(LOG_DEBUG, "32-bit breakdown: %d decimal = 0x%x hex", (int)value, (int)value);
-		
-		// Show binary representation in groups of 8 bits
-		char binary_str[33];
-		int j = 0;
-		for (int debug_i = 31; debug_i >= 0; debug_i--)
-		{
-			binary_str[j++] = (value & (1ULL << debug_i)) ? '1' : '0';
-			if (debug_i % 8 == 0 && debug_i > 0)
-				binary_str[j++] = ' ';
-		}
-		binary_str[j] = '\0';
-		log_msg(LOG_DEBUG, "Binary: %s", binary_str);
-		
-		// Verify the value we're actually about to send
-		log_msg(LOG_DEBUG, "Verifying: raw value = %u, cast to int = %d", 
-			(unsigned int)value, (int)value);
-	}
 	
 	i = bit_length - 1;
 	while (i >= 0)

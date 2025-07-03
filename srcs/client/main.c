@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 10:30:00 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 10:36:09 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,19 +15,11 @@
 void	signal_handler(int signum, siginfo_t *info, void *context)
 {
 	t_server_state	*server;
-	const char		*signal_name;
-	pid_t			my_pid;
 
 	(void)context;
 	server = get_server_instance();
-	my_pid = getpid();
 	
-	if (signum == SIGUSR1)
-		signal_name = "SIGUSR1";
-	else
-		signal_name = "SIGUSR2";
-	
-	log_msg(LOG_DEBUG, "Received signal %s from PID %d", signal_name, info->si_pid);
+	log_msg(LOG_DEBUG, "Received signal %d from PID %d", signum, info->si_pid);
 	
 	// Only accept signals from the server we're connected to
 	if (server->pid != 0 && info->si_pid != server->pid)
@@ -36,31 +28,16 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 		return ;
 	}
 	
-	// Only process signals if we own the transmission
-	if (server->transmission_active && !is_transmission_owner(my_pid))
-	{
-		log_msg(LOG_DEBUG, "Ignoring signal - not transmission owner");
-		return ;
-	}
-	
 	if (signum == SIGUSR2)
 	{
-		// Server acknowledgment - only accept if we're still transmitting
-		if (server->ready_to_proceed)
-		{
-			log_msg(LOG_DEBUG, "Ignoring duplicate ACK signal");
-			return ;
-		}
-		
+		// Simple acknowledgment handling
 		server->ready_to_proceed = 1;
-		server->ack_count++;
-		log_msg(LOG_DEBUG, "Server ready to receive next bit (ack #%d)", server->ack_count);
+		log_msg(LOG_DEBUG, "Server ready to receive next bit");
 	}
 	else if (signum == SIGUSR1)
 	{
 		ft_printf("Message was received by the server.\n");
 		log_msg(LOG_SUCCESS, "Message delivery confirmed by server");
-		end_transmission();
 		exit(EXIT_SUCCESS);
 	}
 }
@@ -79,37 +56,12 @@ void	setup_signal_handlers(sigset_t *sigset, struct sigaction *sa)
 
 void	start_transmission(t_client *data, int msg_len)
 {
-	int estimated_time_seconds;
-	
 	// Wait for our turn in the queue
 	wait_for_transmission_slot(data);
 	
 	ft_printf("Starting transmission (%d characters)...\n", msg_len);
-	log_msg(LOG_INFO, "About to send message length: %d (0x%x)", msg_len, msg_len);
 	
-	// Validate message length before sending
-	if (msg_len <= 0 || msg_len > 10000000)
-	{
-		ft_printf("Error: Invalid message length: %d\n", msg_len);
-		log_msg(LOG_ERROR, "Invalid message length: %d", msg_len);
-		exit(EXIT_FAILURE);
-	}
-	
-	// Calculate and display estimated transmission time
-	estimated_time_seconds = (msg_len * 8 * 100) / 1000000; // 100μs per bit
-	if (estimated_time_seconds > 60)
-	{
-		ft_printf("Large message detected (%d chars).\n", msg_len);
-		ft_printf("Estimated transmission time: %d minutes %d seconds\n", 
-			estimated_time_seconds / 60, estimated_time_seconds % 60);
-		ft_printf("Please be patient...\n");
-	}
-	else if (estimated_time_seconds > 10)
-	{
-		ft_printf("This transmission will take approximately %d seconds\n", estimated_time_seconds);
-	}
-	
-	// Send header (message length only for now)
+	// Send header (message length only)
 	log_msg(LOG_INFO, "Starting header transmission (message length)");
 	send_signals(&msg_len, 32, data);
 	
