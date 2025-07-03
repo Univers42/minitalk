@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:19:40 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 13:29:28 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 18:12:01 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,9 @@
 # define SERVER_BUSY SIGUSR2
 # define EXIT_SUCCESS 0
 # define EXIT_FAILURE 1
+# define TIMEOUT	50000
+# define SLEEP_TIME 50000
+
 
 typedef struct s_message
 {

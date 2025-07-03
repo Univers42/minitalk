@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:34:02 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 03:58:45 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 18:08:17 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,7 @@ void			put_level_buffered(t_buffer buffer, int *pos,
 void			log_msg(t_log_level level, const char *fmt, ...);
 void			vlog_msg_automata(const char *fmt, va_list args,
 					t_buffer buffer, int *pos);
-
+					
 t_parser_tables	*get_parser_tables(void);
 
 // Additional function declarations for new files
