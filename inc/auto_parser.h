@@ -16,8 +16,10 @@
 
 // Note: Color definitions are provided by libft/render/ft_colors.h
 
-typedef char		t_buffer[1024];
-
+typedef char			t_buffer[1024];
+typedef t_format_state	(*t_state_action)(t_parser_ctx *ctx, char c);
+typedef void			(*t_flag_action)(t_format_spec *spec);
+typedef void			(*t_spec_action)(t_parser_ctx *ctx);
 typedef enum s_log_level
 {
 	LOG_INFO,
@@ -39,7 +41,6 @@ typedef enum s_log_level
 # define CHAR_PERCENT       0x20
 # define STATE_COUNT        8
 
-typedef t_format_state	(*t_state_action)(t_parser_ctx *ctx, char c);
 typedef enum s_format_state
 {
 	STATE_NORMAL,
@@ -77,9 +78,6 @@ typedef struct s_parser_ctx
 	int						*pos;
 	struct s_parser_tables	*tables;
 }							t_parser_ctx;
-
-typedef void		(*t_flag_action)(t_format_spec *spec);
-typedef void		(*t_spec_action)(t_parser_ctx *ctx);
 
 typedef struct s_parser_tables
 {
