@@ -6,7 +6,7 @@
 /*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:19:40 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/02 19:00:00 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/03 01:02:23 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,6 @@
 
 # include "libft.h"
 # include "auto_parser.h"
-# include <signal.h>
-# include <sys/types.h>
-# include <unistd.h>
-# include <stdlib.h>
-# include <string.h>
 
 # define HEADER_SIZE 32
 # define HEADER_MESSAGE "Message received: "
@@ -70,4 +65,3 @@ void			*ft_memset(void *s, int c, size_t n);
 void			ft_bzero(void *s, size_t n);
 
 #endif
-
