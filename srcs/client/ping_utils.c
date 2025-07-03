@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/03 03:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 04:48:34 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 07:57:43 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,13 +60,21 @@ void	send_message(char *str, t_client *data)
 {
 	int				i;
 	pid_t			my_pid;
-	//t_server_state	*server;
+	int				total_chars;
+	int				progress_interval;
 
 	i = 0;
 	my_pid = getpid();
-	//server = get_server_instance();
+	total_chars = ft_strlen(str);
 	
-	log_msg(LOG_INFO, "Starting message transmission: \"%s\"", str);
+	// Calculate progress reporting interval (every 5% or every 1000 chars, whichever is larger)
+	progress_interval = (total_chars / 20); // 5%
+	if (progress_interval < 1000)
+		progress_interval = 1000;
+	if (progress_interval > 10000)
+		progress_interval = 10000;
+	
+	log_msg(LOG_INFO, "Starting message transmission: %d characters", total_chars);
 	
 	while (str[i])
 	{
@@ -77,11 +85,20 @@ void	send_message(char *str, t_client *data)
 			exit(EXIT_FAILURE);
 		}
 		
+		// Progress reporting for large messages
+		if (total_chars > 5000 && (i % progress_interval == 0) && i > 0)
+		{
+			int percentage = (i * 100) / total_chars;
+			ft_printf("Progress: %d%% (%d/%d characters)\n", percentage, i, total_chars);
+		}
+		
 		log_msg(LOG_DEBUG, "Sending character %d: '%c' (ASCII: %d)",
 			i + 1, str[i], str[i]);
 		send_signals(&str[i], 8, data);
 		i++;
 	}
 	
+	if (total_chars > 5000)
+		ft_printf("Progress: 100%% (%d/%d characters) - Complete!\n", i, total_chars);
 	log_msg(LOG_SUCCESS, "Message transmission complete: %d characters sent", i);
 }

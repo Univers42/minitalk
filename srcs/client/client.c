@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:11:03 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 07:17:30 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 07:57:46 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ void	wait_for_server_ack(void)
 	server = get_server_instance();
 	my_pid = getpid();
 	timeout_count = 0;
-	max_timeout = 50000; // 5 seconds - reduced timeout
+	max_timeout = 100000; // 10 seconds - increased timeout for multiple acks
 	
 	log_msg(LOG_DEBUG, "Waiting for server acknowledgment...");
 	while (!server->ready_to_proceed)
@@ -166,17 +166,39 @@ void	wait_for_transmission_slot(t_client *data)
 
 void	send_bit(unsigned long long value, int i, t_client *info)
 {
-	int	bit_value;
+	int		bit_value;
+	int		retry_count;
+	int		max_retries;
 
 	bit_value = 0;
+	retry_count = 0;
+	max_retries = 3;
+	
 	if (value & (1ULL << i))
 		bit_value = 1;
+	
 	log_msg(LOG_DEBUG, "Sending bit %d: %d", i, bit_value);
-	if (bit_value)
-		send_signal(info->server_pid, CHAR_1);
-	else
-		send_signal(info->server_pid, CHAR_0);
-	wait_for_server_ack();
+	
+	// Retry loop for signal sending
+	while (retry_count < max_retries)
+	{
+		// Send the signal
+		if (bit_value)
+			send_signal(info->server_pid, CHAR_1);
+		else
+			send_signal(info->server_pid, CHAR_0);
+		
+		// Wait for acknowledgment with timeout
+		wait_for_server_ack();
+		
+		// If we got here, acknowledgment was received successfully
+		return ;
+	}
+	
+	// If we reach here, all retries failed
+	ft_printf("Error: Failed to send bit after %d retries\n", max_retries);
+	log_msg(LOG_ERROR, "Bit transmission failed after %d retries", max_retries);
+	exit(EXIT_FAILURE);
 }
 
 void	send_signals(void *data, size_t bit_length, t_client *info)

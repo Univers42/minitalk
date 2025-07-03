@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 07:23:19 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 07:57:45 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,11 +67,14 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 	}
 	else
 	{
-		// Handle both message length and checksum in header handler
+		// Handle message length in header handler
 		handle_header(signum);
 	}
 	
-	// Send single acknowledgment signal
+	// Small delay to prevent signal flooding
+	usleep(50); // 50 microseconds
+	
+	// Send multiple acknowledgment signals
 	send_multiple_acks(client->client_pid);
 }
 

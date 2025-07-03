@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 07:23:19 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 07:57:43 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,16 +45,10 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 	
 	if (signum == SIGUSR2)
 	{
-		// Server acknowledgment - only set if not already set
-		if (!server->ready_to_proceed)
-		{
-			server->ready_to_proceed = 1;
-			log_msg(LOG_DEBUG, "Server ready to receive next bit");
-		}
-		else
-		{
-			log_msg(LOG_DEBUG, "Ignoring duplicate acknowledgment");
-		}
+		// Server acknowledgment - always accept (may receive multiple)
+		server->ready_to_proceed = 1;
+		server->ack_count++;
+		log_msg(LOG_DEBUG, "Server ready to receive next bit (ack #%d)", server->ack_count);
 	}
 	else if (signum == SIGUSR1)
 	{
@@ -79,25 +73,32 @@ void	setup_signal_handlers(sigset_t *sigset, struct sigaction *sa)
 
 void	start_transmission(t_client *data, int msg_len)
 {
+	int estimated_time_seconds;
+	
 	// Wait for our turn in the queue
 	wait_for_transmission_slot(data);
 	
 	ft_printf("Starting transmission (%d characters)...\n", msg_len);
 	
+	// Calculate and display estimated transmission time
+	estimated_time_seconds = (msg_len * 8 * 100) / 1000000; // 100μs per bit
+	if (estimated_time_seconds > 60)
+	{
+		ft_printf("Large message detected (%d chars).\n", msg_len);
+		ft_printf("Estimated transmission time: %d minutes %d seconds\n", 
+			estimated_time_seconds / 60, estimated_time_seconds % 60);
+		ft_printf("Please be patient...\n");
+	}
+	else if (estimated_time_seconds > 10)
+	{
+		ft_printf("This transmission will take approximately %d seconds\n", estimated_time_seconds);
+	}
+	
 	// Send header (message length only for now)
 	log_msg(LOG_INFO, "Starting header transmission (message length)");
 	send_signals(&msg_len, 32, data);
 	
-	// Skip checksum for debugging
 	log_msg(LOG_INFO, "Header transmission complete, starting message content");
-	
-	// For large messages, inform user about expected time
-	if (msg_len > 10000)
-	{
-		ft_printf("Large message detected (%d chars). This may take several minutes...\n", msg_len);
-		log_msg(LOG_INFO, "Large message transmission started, estimated time: %d minutes", 
-			(msg_len * 8 * 100) / (1000 * 1000 * 60));
-	}
 	
 	send_message(data->msg, data);
 	log_msg(LOG_INFO, "All data transmitted, waiting for final confirmation");
