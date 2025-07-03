@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:22:54 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 10:26:30 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 10:29:59 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,6 +119,7 @@ void	handle_header(int signum)
 {
 	const int		bit_value = get_bit_value(signum);
 	t_client_state	*client;
+	int				bit_position;
 
 	client = get_client_instance();
 	
@@ -130,25 +131,29 @@ void	handle_header(int signum)
 	
 	if (client->sig_count < HEADER_SIZE)
 	{
-		// Fix the bit position calculation
-		int bit_position = HEADER_SIZE - 1 - client->sig_count;
-		client->msg.size_message |= (bit_value << bit_position);
-		client->sig_count++;
+		// Calculate bit position: MSB first (31, 30, 29, ..., 0)
+		bit_position = HEADER_SIZE - 1 - client->sig_count;
+		
+		if (bit_value)
+			client->msg.size_message |= (1 << bit_position);
 		
 		log_msg(LOG_DEBUG, "Header bit %d/%d: %d (bit_pos: %d, current size: %d)",
-			client->sig_count, HEADER_SIZE, bit_value, bit_position, client->msg.size_message);
+			client->sig_count + 1, HEADER_SIZE, bit_value, bit_position, client->msg.size_message);
 		
-		// Debug: show the bit position calculation for first few bits
-		if (client->sig_count <= 5) // Show first 5 bits for debugging
+		client->sig_count++;
+		
+		// Debug: show the calculation for first few bits
+		if (client->sig_count <= 5)
 		{
-			log_msg(LOG_DEBUG, "Bit position: %d, value: %d, shift result: %d", 
-				bit_position, bit_value, (bit_value << bit_position));
+			log_msg(LOG_DEBUG, "Bit position: %d, value: %d, mask: 0x%x", 
+				bit_position, bit_value, bit_value ? (1 << bit_position) : 0);
 		}
 	}
 	
 	if (client->sig_count == HEADER_SIZE)
 	{
-		log_msg(LOG_INFO, "Header complete: message size = %d bytes", client->msg.size_message);
+		log_msg(LOG_INFO, "Header complete: message size = %d bytes (0x%x)", 
+			client->msg.size_message, client->msg.size_message);
 		
 		// Validate message size
 		if (client->msg.size_message <= 0 || client->msg.size_message > 10000000)
@@ -156,7 +161,7 @@ void	handle_header(int signum)
 			log_msg(LOG_ERROR, "Invalid message size: %d bytes", client->msg.size_message);
 			ft_printf("Error: Invalid message size received: %d\n", client->msg.size_message);
 			
-			// Don't clean global, just reset and continue
+			// Reset and continue
 			reset_client_state(client);
 			return ;
 		}

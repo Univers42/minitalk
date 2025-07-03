@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/03 03:25:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 08:02:16 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 10:29:59 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,5 +103,22 @@ void	handle_msg(int signum)
 			client->msg_pos + 1, client->msg.size_message);
 	}
 	
-	process_character(client, bit_value, bit_pos);
+	// Set the bit in the correct position (MSB first: 7, 6, 5, ..., 0)
+	if (bit_value)
+		client->char_value |= (1 << (7 - bit_pos));
+	
+	client->sig_count++;
+	log_msg(LOG_DEBUG, "Bit %d/8: %d (bit_pos: %d, char value: %d)",
+		bit_pos + 1, bit_value, 7 - bit_pos, client->char_value);
+	
+	if (client->sig_count % 8 == 0)
+	{
+		client->msg.message[client->msg_pos] = client->char_value;
+		log_msg(LOG_DEBUG, "Character complete: '%c' (ASCII: %d) at position %d/%d",
+			client->char_value, client->char_value, client->msg_pos + 1, client->msg.size_message);
+		client->msg_pos++;
+		
+		if (client->msg_pos >= client->msg.size_message)
+			handle_complete_message(client);
+	}
 }

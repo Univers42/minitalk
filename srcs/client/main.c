@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 08:02:15 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 10:30:00 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,13 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 	
 	if (signum == SIGUSR2)
 	{
-		// Server acknowledgment - always accept (may receive multiple)
+		// Server acknowledgment - only accept if we're still transmitting
+		if (server->ready_to_proceed)
+		{
+			log_msg(LOG_DEBUG, "Ignoring duplicate ACK signal");
+			return ;
+		}
+		
 		server->ready_to_proceed = 1;
 		server->ack_count++;
 		log_msg(LOG_DEBUG, "Server ready to receive next bit (ack #%d)", server->ack_count);
