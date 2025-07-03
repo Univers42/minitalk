@@ -6,14 +6,14 @@
 #    By: codespace <codespace@student.42.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#              #
-#    Updated: 2025/07/03 03:31:16 by codespace        ###   ########.fr        #
+#    Updated: 2025/07/03 08:02:17 by codespace        ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME_SERVER = server
 NAME_CLIENT = client
 
-FLAG_DEBUG = 0
+FLAG_DEBUG = 1
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -I./inc -I./inc/libft
 CFLAGS += -DMINITALK_DEBUG=$(FLAG_DEBUG)

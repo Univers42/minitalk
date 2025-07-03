@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:22:54 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 07:23:32 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 08:02:16 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,11 +134,29 @@ void	handle_header(int signum)
 		client->sig_count++;
 		log_msg(LOG_DEBUG, "Header bit %d/%d: %d (current size: %d)",
 			client->sig_count, HEADER_SIZE, bit_value, client->msg.size_message);
+		
+		// Debug: show the bit position calculation
+		if (client->sig_count <= 5) // Show first 5 bits for debugging
+		{
+			int bit_pos = HEADER_SIZE - client->sig_count;
+			log_msg(LOG_DEBUG, "Bit position: %d, value: %d, result: %d", 
+				bit_pos, bit_value, (bit_value << bit_pos));
+		}
 	}
 	
 	if (client->sig_count == HEADER_SIZE)
 	{
 		log_msg(LOG_INFO, "Header complete: message size = %d bytes", client->msg.size_message);
+		
+		// Validate message size
+		if (client->msg.size_message <= 0 || client->msg.size_message > 10000000)
+		{
+			log_msg(LOG_ERROR, "Invalid message size: %d bytes", client->msg.size_message);
+			ft_printf("Error: Invalid message size received\n");
+			clean_global();
+			return ;
+		}
+		
 		memory_reserve_to_store_signals();
 	}
 }

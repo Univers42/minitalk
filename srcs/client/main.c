@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 07:57:43 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 08:02:15 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,15 @@ void	start_transmission(t_client *data, int msg_len)
 	wait_for_transmission_slot(data);
 	
 	ft_printf("Starting transmission (%d characters)...\n", msg_len);
+	log_msg(LOG_INFO, "About to send message length: %d (0x%x)", msg_len, msg_len);
+	
+	// Validate message length before sending
+	if (msg_len <= 0 || msg_len > 10000000)
+	{
+		ft_printf("Error: Invalid message length: %d\n", msg_len);
+		log_msg(LOG_ERROR, "Invalid message length: %d", msg_len);
+		exit(EXIT_FAILURE);
+	}
 	
 	// Calculate and display estimated transmission time
 	estimated_time_seconds = (msg_len * 8 * 100) / 1000000; // 100μs per bit
