@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:19:45 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 17:00:21 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 18:46:22 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,6 @@ int				handle_timeouts(int pid);
 void			init_data(char **argv, t_client *data);
 void			print_error_and_exit(t_parser_result result);
 int				ft_printf(const char *format, ...);
-void			handle_ping_response(int signum, t_server_state *server, pid_t pid);
 void			log_ping_attempt(int attempt, int max_attempts);
 void			log_ping_result(int attempt, int success);
 void			setup_ping_signals(struct sigaction *sa, sigset_t *sigset);
@@ -108,9 +107,11 @@ void			log_ping_signal(int signum, pid_t sender_pid);
 
 /* Validation functions */
 void			validate_and_init(int argc, char **argv, t_client *data);
-int				validate_signal_source(t_server_state *server, pid_t sender_pid);
+int				validate_signal_source(t_server_state *server,
+					pid_t sender_pid);
 int				validate_process_exists(int pid);
-void			check_transmission_ownership(pid_t my_pid, int total_chars, int i);
+void			check_transmission_ownership(pid_t my_pid, int total_chars,
+					int i);
 int				validate_ping_signal(t_server_state *server, siginfo_t *info);
 
 /* Bit manipulation functions */

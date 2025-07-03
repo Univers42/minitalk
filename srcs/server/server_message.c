@@ -5,12 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/03 03:25:33 by codespace         #+#    #+#             */
-<<<<<<< Updated upstream
-/*   Updated: 2025/07/03 18:01:29 by codespace        ###   ########.fr       */
-=======
-/*   Updated: 2025/07/03 17:32:02 by codespace        ###   ########.fr       */
->>>>>>> Stashed changes
+/*   Created: 2025/07/03 18:24:27 by codespace         #+#    #+#             */
+/*   Updated: 2025/07/03 18:24:36 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

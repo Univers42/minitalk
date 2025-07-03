@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 17:25:12 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 18:11:21 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 18:24:54 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,4 +38,3 @@ int	monitor_client_timeout(t_client_state *client)
 	handle_timeout(client, i);
 	return (0);
 }
-

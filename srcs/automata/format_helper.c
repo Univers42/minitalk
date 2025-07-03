@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 01:40:00 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 03:00:04 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 18:57:32 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,38 +64,43 @@ static void	add_sign_prefix(char *temp, int *temp_pos, t_format_spec *spec,
 		temp[(*temp_pos)++] = ' ';
 }
 
-static void	format_number(t_buffer buffer, int *pos, long long num,
-		t_format_spec *spec, int base)
+static void	format_number(t_format_data *data, int base)
 {
 	char	temp[64];
 	int		temp_pos;
 	int		is_negative;
 	int		uppercase;
 
-	uppercase = (spec->specifier == 'X');
+	uppercase = (data->spec->specifier == 'X');
 	is_negative = 0;
-	if (num < 0 && (spec->specifier == 'd' || spec->specifier == 'i'))
+	if (data->num < 0 && (data->spec->specifier == 'd'
+			|| data->spec->specifier == 'i'))
 	{
 		is_negative = 1;
-		num = -num;
+		data->num = -data->num;
 	}
-	temp_pos = convert_to_string(num, temp, base, uppercase);
-	add_sign_prefix(temp, &temp_pos, spec, is_negative);
+	temp_pos = convert_to_string(data->num, temp, base, uppercase);
+	add_sign_prefix(temp, &temp_pos, data->spec, is_negative);
 	reverse_string(temp, temp_pos);
 	temp[temp_pos] = '\0';
-	buffer_append_str(buffer, pos, temp);
+	buffer_append_str(data->buffer, data->pos, temp);
 }
 
 void	buffer_append_int_formatted(t_buffer buffer, int *pos,
 		long long num, t_format_spec *spec)
 {
-	int	base;
+	t_format_data	data;
+	int				base;
 
+	data.buffer = buffer;
+	data.pos = pos;
+	data.num = num;
+	data.spec = spec;
 	base = 10;
 	if (spec->specifier == 'x' || spec->specifier == 'X'
 		|| spec->specifier == 'p')
 		base = 16;
 	else if (spec->specifier == 'o')
 		base = 8;
-	format_number(buffer, pos, num, spec, base);
+	format_number(&data, base);
 }

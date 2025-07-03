@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 17:27:16 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 18:11:00 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 18:36:54 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ void	print_message(t_client_state *client)
 	write(1, "\n", 1);
 }
 
-static void	log_character_completion(t_client_state *client)
+void	log_character_completion(t_client_state *client)
 {
 	char	display_char;
 

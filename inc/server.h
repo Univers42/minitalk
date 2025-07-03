@@ -5,12 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/02 11:19:40 by dlesieur          #+#    #+#             */
-<<<<<<< Updated upstream
-/*   Updated: 2025/07/03 18:12:01 by codespace        ###   ########.fr       */
-=======
-/*   Updated: 2025/07/03 17:33:24 by codespace        ###   ########.fr       */
->>>>>>> Stashed changes
+/*   Created: 2025/07/03 18:32:10 by codespace         #+#    #+#             */
+/*   Updated: 2025/07/03 18:48:06 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,16 +23,8 @@
 # define SERVER_BUSY SIGUSR2
 # define EXIT_SUCCESS 0
 # define EXIT_FAILURE 1
-<<<<<<< Updated upstream
 # define TIMEOUT	50000
 # define SLEEP_TIME 50000
-
-=======
-# define TIMEOUT 5
-# define SLEEP_TIME 500000
-# define TIMEOUT 5
-# define SLEEP_TIME 500000
->>>>>>> Stashed changes
 
 typedef struct s_message
 {
@@ -87,7 +75,8 @@ int				ft_printf(const char *format, ...);
 void			*ft_memset(void *s, int c, size_t n);
 void			ft_bzero(void *s, size_t n);
 int				get_bit_value(int signum);
-void			process_character(t_client_state *client, int bit_value, int bit_pos);
+void			process_character(t_client_state *client,
+					int bit_value, int bit_pos);
 void			print_message(t_client_state *client);
 void			handle_complete_message(t_client_state *client);
 int				check_client_disconnection(t_client_state *client);
@@ -100,4 +89,6 @@ int				calculate_checksum(const char *data, int length);
 void			send_multiple_acks(pid_t client_pid);
 int				lost_signal(int s_si_pid, int signum, void *context);
 void			send_completion_signal(pid_t client_pid);
+void			log_character_completion(t_client_state *client);
+int				monitor_client_timeout(t_client_state *client);
 #endif

@@ -6,7 +6,7 @@
 #    By: codespace <codespace@student.42.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#              #
-#    Updated: 2025/07/03 17:21:17 by codespace        ###   ########.fr        #
+#    Updated: 2025/07/03 18:37:41 by codespace        ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,8 @@ CLIENT_DIR = srcs/client
 AUTOMATA_DIR = srcs/automata
 
 # Source files
-SERVER_SRCS = $(SERVER_DIR)/main.c $(SERVER_DIR)/server.c $(SERVER_DIR)/signals.c $(SERVER_DIR)/server_loop.c $(SERVER_DIR)/server_message.c $(SERVER_DIR)/server_cleanup.c
+SERVER_SRCS = $(SERVER_DIR)/main.c $(SERVER_DIR)/server.c $(SERVER_DIR)/signals.c $(SERVER_DIR)/server_loop.c $(SERVER_DIR)/server_message.c \
+				$(SERVER_DIR)/crook.c $(SERVER_DIR)/debug.c $(SERVER_DIR)/inits.c $(SERVER_DIR)/time.c $(SERVER_DIR)/check.c
 
 CLIENT_SRCS = 	$(CLIENT_DIR)/main.c $(CLIENT_DIR)/bits.c $(CLIENT_DIR)/ping.c $(CLIENT_DIR)/parser.c $(CLIENT_DIR)/singleton.c $(CLIENT_DIR)/ping_utils.c \
 				$(CLIENT_DIR)/time.c $(CLIENT_DIR)/inits.c $(CLIENT_DIR)/hook.c $(CLIENT_DIR)/handshake.c $(CLIENT_DIR)/debug.c $(CLIENT_DIR)/checksum.c $(CLIENT_DIR)/check.c \

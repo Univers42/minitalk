@@ -5,12 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/02 11:34:02 by dlesieur          #+#    #+#             */
-<<<<<<< Updated upstream
-/*   Updated: 2025/07/03 18:08:17 by codespace        ###   ########.fr       */
-=======
-/*   Updated: 2025/07/03 17:20:35 by codespace        ###   ########.fr       */
->>>>>>> Stashed changes
+/*   Created: 2025/07/03 18:31:55 by codespace         #+#    #+#             */
+/*   Updated: 2025/07/03 18:57:33 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +92,14 @@ typedef struct s_parser_tables
 	const char		*level_strings[5];
 }					t_parser_tables;
 
+typedef struct s_format_data
+{
+	char			*buffer;
+	int				*pos;
+	long long		num;
+	t_format_spec	*spec;
+}	t_format_data;
+
 // Function declarations
 t_format_state	action_normal(t_parser_ctx *ctx, char c);
 t_format_state	action_percent(t_parser_ctx *ctx, char c);
@@ -105,6 +109,7 @@ t_format_state	action_precision(t_parser_ctx *ctx, char c);
 t_format_state	action_length(t_parser_ctx *ctx, char c);
 t_format_state	action_specifier(t_parser_ctx *ctx, char c);
 t_format_state	action_error(t_parser_ctx *ctx, char c);
+t_parser_tables	*get_parser_tables(void);
 
 void			flag_left_align(t_format_spec *spec);
 void			flag_show_sign(t_format_spec *spec);
@@ -133,9 +138,7 @@ void			put_level_buffered(t_buffer buffer, int *pos,
 					t_log_level level);
 void			log_msg(t_log_level level, const char *fmt, ...);
 void			vlog_msg_automata(const char *fmt, va_list args,
-					t_buffer buffer, int *pos);
-					
-t_parser_tables	*get_parser_tables(void);
+					t_buffer buffer, int *pos);					
 
 // Additional function declarations for new files
 int				verify_buffer_integrity(t_buffer buffer, int pos);

@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 17:32:46 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 17:33:50 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 18:26:08 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,11 @@ t_client_state	*get_client_instance(void)
 
 void	reset_client_state(t_client_state *client)
 {
-	pid_t	old_pid = client->actual_pid;
-	int		was_active = client->transmission_active;
-	
+	pid_t	old_pid;
+	int		was_active;
+
+	old_pid = client->actual_pid;
+	was_active = client->transmission_active;
 	if (client->msg.message)
 	{
 		free(client->msg.message);
@@ -46,9 +48,9 @@ void	reset_client_state(t_client_state *client)
 	client->getting_header = 1;
 	client->msg.size_message = 0;
 	client->transmission_active = 0;
-	
 	if (was_active && old_pid > 0)
-		log_msg(LOG_INFO, "Released transmission slot from client PID %d", old_pid);
+		log_msg(LOG_INFO, "Released transmission slot from client PID %d",
+			old_pid);
 }
 
 void	clean_global(void)
