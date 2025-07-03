@@ -107,6 +107,16 @@ int	connect_to_server(t_client *data)
 {
 	log_msg(LOG_INFO, "Attempting to connect to server PID %d",
 		data->server_pid);
+	
+	// Final check before attempting connection
+	if (kill(data->server_pid, 0) == -1)
+	{
+		ft_printf("Error: Server process PID %d does not exist or is not accessible\n", 
+			data->server_pid);
+		log_msg(LOG_ERROR, "Server process validation failed");
+		return (0);
+	}
+	
 	if (ping(data->server_pid) == 0)
 		return (0);
 	return (1);

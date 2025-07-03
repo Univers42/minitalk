@@ -14,7 +14,8 @@
 
 int	validate_pid_string(const char *str)
 {
-	int	i;
+	int		i;
+	pid_t	pid;
 
 	if (!str || !str[0])
 		return (0);
@@ -25,6 +26,19 @@ int	validate_pid_string(const char *str)
 			return (0);
 		i++;
 	}
+	
+	// Additional check: verify the PID exists
+	pid = ft_atoi(str);
+	if (pid <= 0)
+		return (0);
+	
+	// Check if process exists by sending signal 0 (no signal, just check)
+	if (kill(pid, 0) == -1)
+	{
+		// Process doesn't exist or we don't have permission
+		return (0);
+	}
+	
 	return (1);
 }
 

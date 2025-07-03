@@ -36,6 +36,15 @@ void	send_signal(pid_t pid, int signal)
 		signal_name = "SIGUSR1 (0)";
 	else
 		signal_name = "SIGUSR2 (1)";
+	
+	// First check if process exists
+	if (kill(pid, 0) == -1)
+	{
+		ft_printf("Error: Server process PID %d no longer exists\n", pid);
+		log_msg(LOG_ERROR, "Server process PID %d disappeared", pid);
+		exit(EXIT_FAILURE);
+	}
+	
 	if (kill(pid, signal) == -1)
 	{
 		ft_printf("Error: Signal sending failed\n");
@@ -125,6 +134,15 @@ void	wait_for_transmission_slot(t_client *data)
 		{
 			log_msg(LOG_INFO, "Still waiting for transmission slot (waited %d seconds)", 
 				wait_count / 100);
+			
+			// Check if server process still exists
+			if (kill(server->pid, 0) == -1)
+			{
+				ft_printf("Error: Server process PID %d no longer exists\n", server->pid);
+				log_msg(LOG_ERROR, "Server process disappeared while waiting");
+				exit(EXIT_FAILURE);
+			}
+			
 			if (kill(server->pid, SIGUSR1) == -1)
 			{
 				log_msg(LOG_ERROR, "Server appears to be down");

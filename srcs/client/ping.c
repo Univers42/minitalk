@@ -82,7 +82,22 @@ int	handle_timeouts(int pid)
 	while (++i <= RETRY_TIMES)
 	{
 		log_ping_attempt(i, RETRY_TIMES);
-		kill(pid, SIGUSR1);
+		
+		// Check if process still exists before sending signal
+		if (kill(pid, 0) == -1)
+		{
+			log_msg(LOG_ERROR, "Process PID %d does not exist or is not accessible", pid);
+			ft_printf("Error: Server process PID %d not found\n", pid);
+			return (1);
+		}
+		
+		if (kill(pid, SIGUSR1) == -1)
+		{
+			log_msg(LOG_ERROR, "Failed to send signal to PID %d", pid);
+			ft_printf("Error: Failed to send signal to server PID %d\n", pid);
+			return (1);
+		}
+		
 		if (check_server_and_sleep())
 		{
 			log_ping_result(i, 1);
