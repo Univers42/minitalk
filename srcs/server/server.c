@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:22:54 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 07:17:27 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 07:23:32 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,47 +121,24 @@ void	handle_header(int signum)
 	t_client_state	*client;
 
 	client = get_client_instance();
+	
 	if (client->sig_count == 0)
 	{
-		if (client->getting_header == 1)
-		{
-			client->msg.size_message = 0;
-			log_msg(LOG_DEBUG, "Starting header reception (message length)");
-		}
-		else
-		{
-			client->expected_checksum = 0;
-			log_msg(LOG_DEBUG, "Starting checksum reception");
-		}
+		client->msg.size_message = 0;
+		log_msg(LOG_DEBUG, "Starting header reception (message length)");
 	}
 	
 	if (client->sig_count < HEADER_SIZE)
 	{
-		if (client->getting_header == 1)
-		{
-			client->msg.size_message |= (bit_value << (HEADER_SIZE - 1 - client->sig_count));
-		}
-		else
-		{
-			client->expected_checksum |= (bit_value << (HEADER_SIZE - 1 - client->sig_count));
-		}
+		client->msg.size_message |= (bit_value << (HEADER_SIZE - 1 - client->sig_count));
 		client->sig_count++;
-		log_msg(LOG_DEBUG, "Header bit %d/%d: %d", client->sig_count, HEADER_SIZE, bit_value);
+		log_msg(LOG_DEBUG, "Header bit %d/%d: %d (current size: %d)",
+			client->sig_count, HEADER_SIZE, bit_value, client->msg.size_message);
 	}
 	
 	if (client->sig_count == HEADER_SIZE)
 	{
-		if (client->getting_header == 1)
-		{
-			log_msg(LOG_INFO, "Message length received: %d bytes", client->msg.size_message);
-			client->getting_header = 0;
-			client->sig_count = 0;
-			log_msg(LOG_DEBUG, "Now expecting checksum");
-		}
-		else
-		{
-			log_msg(LOG_INFO, "Checksum received: %d", client->expected_checksum);
-			memory_reserve_to_store_signals();
-		}
+		log_msg(LOG_INFO, "Header complete: message size = %d bytes", client->msg.size_message);
+		memory_reserve_to_store_signals();
 	}
 }

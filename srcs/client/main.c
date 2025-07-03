@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 07:17:30 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 07:23:19 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,25 +79,16 @@ void	setup_signal_handlers(sigset_t *sigset, struct sigaction *sa)
 
 void	start_transmission(t_client *data, int msg_len)
 {
-	int	checksum;
-
 	// Wait for our turn in the queue
 	wait_for_transmission_slot(data);
 	
 	ft_printf("Starting transmission (%d characters)...\n", msg_len);
 	
-	// Calculate message checksum
-	checksum = calculate_checksum(data->msg, msg_len);
-	log_msg(LOG_INFO, "Message checksum: %d", checksum);
-	
-	// Send header (message length)
+	// Send header (message length only for now)
 	log_msg(LOG_INFO, "Starting header transmission (message length)");
 	send_signals(&msg_len, 32, data);
 	
-	// Send checksum
-	log_msg(LOG_INFO, "Sending message checksum");
-	send_signals(&checksum, 32, data);
-	
+	// Skip checksum for debugging
 	log_msg(LOG_INFO, "Header transmission complete, starting message content");
 	
 	// For large messages, inform user about expected time
