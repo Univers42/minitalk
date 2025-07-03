@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 04:33:56 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 04:48:32 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,37 +35,26 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 	if (info->si_pid == getpid())
 		return ;
 	
-	client->client_pid = info->si_pid;
-	
-	// Handle new client connection (ping)
+	// Handle new client connection (ping) when server is idle
 	if (client->actual_pid == 0)
 	{
-		log_msg(LOG_INFO, "New client connection from PID %d", client->client_pid);
+		log_msg(LOG_INFO, "New client connection from PID %d", info->si_pid);
+		client->client_pid = info->si_pid;
 		pong(client->client_pid);
 		return ;
 	}
 	
-	// Handle signals from different clients
-	if (client->actual_pid != client->client_pid)
+	// If server is busy with another client, reject the signal immediately
+	if (client->actual_pid != info->si_pid)
 	{
-		// If server is busy, send busy signal to new client
-		if (is_server_busy())
-		{
-			log_msg(LOG_WARNING, "Server busy, rejecting signal from PID %d (current client: %d)", 
-				client->client_pid, client->actual_pid);
-			kill(client->client_pid, SERVER_BUSY);
-			return ;
-		}
-		else
-		{
-			// This might be a ping from a queued client
-			log_msg(LOG_INFO, "Ping from queued client PID %d", client->client_pid);
-			pong(client->client_pid);
-			return ;
-		}
+		log_msg(LOG_WARNING, "Server busy, rejecting signal from PID %d (current client: %d)", 
+			info->si_pid, client->actual_pid);
+		kill(info->si_pid, SERVER_BUSY);
+		return ;
 	}
 	
-	// Process signals from the active client
+	// Process signals only from the current active client
+	client->client_pid = info->si_pid;
 	client->client_activity = 1;
 	log_msg(LOG_DEBUG, "Processing signal %d from active client %d", signum, client->client_pid);
 	
@@ -74,9 +63,8 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 	else if (client->getting_msg == 1)
 		handle_msg(signum);
 	
-	// Send acknowledgment back to the active client
-	if (client->actual_pid > 0)
-		kill(client->client_pid, SIGUSR2);
+	// Send acknowledgment back to the active client only
+	kill(client->client_pid, SIGUSR2);
 }
 
 int	main(void)

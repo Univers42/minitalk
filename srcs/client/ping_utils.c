@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/03 03:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 04:34:48 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 04:48:34 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,15 @@ void	handle_ping_response(int signum, t_server_state *server, pid_t pid)
 {
 	if (signum == SIGUSR1)
 	{
-		// Server is ready or transmission slot is available
+		// Server is ready and available
 		server->is_ready = 1;
 		log_msg(LOG_SUCCESS, "Server ready signal received from PID %d", pid);
 	}
 	else if (signum == SIGUSR2)
 	{
-		// Server is busy with another client
+		// Server is busy with another client - need to wait
 		server->is_ready = 0;
-		log_msg(LOG_INFO, "Server busy signal received from PID %d", pid);
+		log_msg(LOG_WARNING, "Server busy signal received from PID %d - will retry", pid);
 	}
 }
 

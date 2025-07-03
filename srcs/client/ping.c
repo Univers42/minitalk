@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/03 02:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 04:33:51 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 04:48:34 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,8 +89,17 @@ int	handle_timeouts(int pid)
 			return (0);
 		}
 		log_ping_result(i, 0);
-		// Exponential backoff for retries
-		usleep(i * 100000); // Additional delay between retries
+		
+		// If server is consistently busy, wait longer between retries
+		if (i > RETRY_TIMES / 2)
+		{
+			log_msg(LOG_INFO, "Server appears busy, increasing retry delay");
+			usleep(i * 500000); // Longer delay for busy server
+		}
+		else
+		{
+			usleep(i * 100000); // Standard exponential backoff
+		}
 	}
 	log_msg(LOG_ERROR, "Server did not respond after %d attempts", RETRY_TIMES);
 	return (1);

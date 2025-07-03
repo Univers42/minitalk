@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:11:03 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 04:34:04 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/03 04:48:33 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,8 +50,10 @@ void	wait_for_server_ack(void)
 	t_server_state	*server;
 	int				timeout_count;
 	int				max_timeout;
+	pid_t			my_pid;
 
 	server = get_server_instance();
+	my_pid = getpid();
 	timeout_count = 0;
 	max_timeout = 600000; // 60 seconds for large messages
 	
@@ -61,11 +63,22 @@ void	wait_for_server_ack(void)
 		usleep(100);
 		timeout_count++;
 		
+		// Check if we still own the transmission every 1000 iterations (100ms)
+		if (timeout_count % 1000 == 0)
+		{
+			if (!is_transmission_owner(my_pid))
+			{
+				log_msg(LOG_ERROR, "Lost transmission ownership while waiting for ACK");
+				exit(EXIT_FAILURE);
+			}
+		}
+		
 		if (timeout_count > max_timeout)
 		{
 			ft_printf("Error: Server acknowledgment timeout\n");
 			log_msg(LOG_ERROR, "Timeout waiting for server acknowledgment"
 				" after %d attempts", timeout_count);
+			end_transmission();
 			exit(EXIT_FAILURE);
 		}
 	}
