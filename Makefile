@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: codespace <codespace@student.42.fr>        +#+  +:+       +#+         #
+#    By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#              #
-#    Updated: 2025/07/03 18:37:41 by codespace        ###   ########.fr        #
+#    Updated: 2025/07/15 00:09:42 by dlesieur         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -51,11 +51,11 @@ $(LIBFT_DIR)/libft.a:
 	$(MAKE) -C $(LIBFT_DIR)
 
 # Build server
-$(NAME_SERVER): $(SERVER_OBJS) $(LIBFT_DIR)/libft.a
+$(NAME_SERVER): $(LIBFT_DIR)/libft.a $(SERVER_OBJS) 
 	$(CC) $(CFLAGS) -o $@ $(SERVER_OBJS) -L$(LIBFT_DIR) -lft
 
 # Build client
-$(NAME_CLIENT): $(CLIENT_OBJS) $(LIBFT_DIR)/libft.a
+$(NAME_CLIENT): $(LIBFT_DIR)/libft.a $(CLIENT_OBJS) 
 	$(CC) $(CFLAGS) -o $@ $(CLIENT_OBJS) -L$(LIBFT_DIR) -lft
 
 # Compile .c to .o
