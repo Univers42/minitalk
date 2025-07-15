@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   handshake.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 16:19:47 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 17:20:18 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 03:41:21 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,23 @@ void	handle_acknowledgment(t_server_state *server)
 	log_msg(LOG_DEBUG, "Server ready to receive next bit");
 }
 
+/**
+ * gets eserver instance and current process ID
+ * continuously checks for server acknowledgment
+ * implements progressive timeout mechanism
+ * periodically verifies transmission ownership
+ * Reset acknowledgment flag after receiving response
+ * maximum 50000 iterations with 100 micro second dealys
+ * each 100micro second the ownership is verified
+ * use usleep(100) for efficient `polling`
+ * calls handle_timeout when maximum timeout is reached
+ * performas ownership check to prevent deadlocks
+ * @param none
+ * @note
+ * This function is called after sending data to server
+ * Essential for synchronuos communication
+ * Prevents data corruption from premature transmissions
+ */
 void	wait_for_server_ack(void)
 {
 	t_server_state	*server;
@@ -42,6 +59,18 @@ void	wait_for_server_ack(void)
 	log_msg(LOG_DEBUG, "Server acknowledgment received");
 }
 
+/**
+ * This fucntion is continously monitoring if transmission is active
+ * and process doens't own it
+ * this report every 3000 iterations (30 seconds)
+ * Verify the server health check existence
+ * exit with failute ater 10 minutes
+ * @param server 
+ * @param my_pid
+ * @param wait_count
+ * @note exit if server no longer exist or if waiting exceed limits
+ * called interally by `wait_for_transmission_slot`
+ */
 static void	handle_transmission_wait_loop(t_server_state *server, pid_t my_pid,
 		int *wait_count)
 {
@@ -66,6 +95,17 @@ static void	handle_transmission_wait_loop(t_server_state *server, pid_t my_pid,
 	}
 }
 
+/**
+ * purpose : acquire exclusive tranmission rights for the current
+ * client process, ensuring only one client can transmit at a time
+ * behavior :
+ * fast path : if transmission is inactive or already owned, immediately
+ * adquire slot
+ * 2. slow path: if transmission is active by another process,
+ * enter waiting loop
+ * 3. slot acquisition: set transmission as active for curren tprocess
+ * 4. report acquisition status
+ */
 void	wait_for_transmission_slot(t_client *data)
 {
 	t_server_state	*server;

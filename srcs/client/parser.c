@@ -3,15 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:17:02 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 17:13:07 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 02:39:00 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "client.h"
 
+/**
+First we validate that the pid is just a number not some sequence like
+`123abc`
+then we convert it and we try a first connection to know if
+the PID is reachable
+*/
 int	validate_pid_string(const char *str)
 {
 	int		i;
@@ -34,6 +40,11 @@ int	validate_pid_string(const char *str)
 	return (1);
 }
 
+/**
+	if an error has been recognized we reuse the parser state
+	to print the type of error
+	**innefficiency but don't care, too late to change it**
+*/
 void	print_error_and_exit(t_parser_result result)
 {
 	if (result == PARSER_INVALID_ARGC)
@@ -54,6 +65,12 @@ void	print_error_and_exit(t_parser_result result)
 	exit(EXIT_FAILURE);
 }
 
+/**
+Check the number of argument entered
+Check if the pid can be reached
+Check if the message is empty
+otherwise return 0 which is handled as a succes
+*/
 t_parser_result	parse_arguments(int argc, char **argv)
 {
 	if (argc != 3)

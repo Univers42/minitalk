@@ -3,15 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   ping_utils.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/03 03:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 17:13:26 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 03:50:40 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "client.h"
 
+/**
+ * has we can see we check if the message can be send or not
+ * two types of behavior are to be expected. either ready or not
+ */
 void	handle_pong(int signum, t_server_state *server, pid_t pid)
 {
 	if (signum == SIGUSR1)
@@ -25,6 +29,7 @@ void	handle_pong(int signum, t_server_state *server, pid_t pid)
 		log_msg(LOG_WARNING, "Server busy signal received from PID %d", pid);
 	}
 }
+
 
 void	send_message(char *str, t_client *data)
 {

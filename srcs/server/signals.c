@@ -3,15 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   signals.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 19:00:00 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 17:25:47 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 04:43:03 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.h"
 
+/**
+ * same here I refactorized eleminiting redundancies
+ * all member added to 0 when it was unnecessary
+ */
 int	pong(int pid)
 {
 	t_client_state	*client;
@@ -27,10 +31,6 @@ int	pong(int pid)
 	client->actual_pid = pid;
 	client->client_pid = pid;
 	client->getting_header = 1;
-	client->getting_msg = 0;
-	client->sig_count = 0;
-	client->msg_pos = 0;
-	client->char_value = 0;
 	client->client_activity = 1;
 	set_server_busy(pid);
 	log_msg(LOG_INFO, "Client %d connected, sending ready signal", pid);

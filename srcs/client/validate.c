@@ -3,15 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   validate.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 17:16:35 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 17:18:30 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 03:53:53 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "client.h"
 
+/**
+ * check if the server pid is not from another source
+ * in case someone by pass the system. just verification in case of
+ * corruption trial
+ */
 int	validate_signal_source(t_server_state *server, pid_t sender_pid)
 {
 	if (server->pid != 0 && sender_pid != server->pid)
@@ -23,6 +28,9 @@ int	validate_signal_source(t_server_state *server, pid_t sender_pid)
 	return (1);
 }
 
+/**
+ * check if the process exist
+ */
 int	validate_process_exists(int pid)
 {
 	if (kill(pid, 0) == -1)
@@ -58,6 +66,12 @@ int	validate_ping_signal(t_server_state *server, siginfo_t *info)
 	return (1);
 }
 
+/**
+	we check the type of the PID, verify it it can be hooked
+	then we convert it to the idenfication usable to our program
+	in case of error use the state machine created
+	and if all good just init
+*/
 void	validate_and_init(int argc, char **argv, t_client *data)
 {
 	t_parser_result	parse_result;

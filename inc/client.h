@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   client.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 11:19:45 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/07/03 18:46:22 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 04:27:21 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,31 +26,40 @@
 # define USAGE				"Usage: ./client <server_pid> <message>"
 # define BAD_SIGNAL			"Invalid server PID"
 
+/**
+ * @brief Enumeration for command-line parsing results
+ */
 typedef enum e_parser_result
 {
-	PARSER_SUCCESS,
-	PARSER_INVALID_ARGC,
-	PARSER_INVALID_PID,
-	PARSER_EMPTY_MESSAGE
+	PARSER_SUCCESS,			//command-line arguments parsed successfully
+	PARSER_INVALID_ARGC,	// Incorrect number of cmd-line arguments
+	PARSER_INVALID_PID,		//invalid process ID format or non-existent
+	PARSER_EMPTY_MESSAGE,	//Message string empty
 }	t_parser_result;
 
+/**
+ * @brief Structure to hold client-side configuration and state
+ */
 typedef struct s_client
 {
-	pid_t	server_pid;
-	pid_t	client_pid;
-	char	*msg;
-}			t_client;
+	pid_t		server_pid;	//Process ID of the target server to communicate
+	pid_t		client_pid;	//process ID of this client (usually getpid())
+	t_string	msg;		//Pointer to the msg string to be sent to server
+}				t_client;
 
+/**
+ * @brief structure to maintain server side state and connection management
+ */
 typedef struct s_server_state
 {
-	pid_t	pid;
-	int		is_ready;
-	int		ready_to_proceed;
-	int		transmission_active;
-	pid_t	current_client_pid;
-	int		transmission_id;
-	int		last_sequence;
-	int		ack_count;
+	pid_t	pid;				// Process ID of the server itself
+	int		is_ready;			// is server ready ? 1 : 0
+	int		ready_to_proceed;	// is ready_proceed ? 1 : 0
+	int		transmission_active;// is transmission_active ? 1 : 0
+	pid_t	current_client_pid;	// Process ID of the client served
+	int		transmission_id;	// unique identifier for the current session
+	int		last_sequence;		// sequence number of the last packet
+	int		ack_count;			// Number of acknowledgments sent to track flow
 }			t_server_state;
 
 /* Singleton functions */
@@ -122,4 +131,5 @@ void			send_bit(unsigned long long value, int i, t_client *info);
 /* Ping utility functions */
 void			handle_pong(int signum, t_server_state *server, pid_t pid);
 int				send_ping_signal(int pid);
+
 #endif

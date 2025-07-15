@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   hook.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 16:21:00 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 17:10:51 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 03:27:27 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "client.h"
 
+//just a wrapper that help to trace the error if occuring
 void	establish_connection(t_client *data)
 {
 	if (!connect_to_server(data))
@@ -21,6 +22,9 @@ void	establish_connection(t_client *data)
 	}
 }
 
+/**
+ * works with all the ping system
+ */
 int	connect_to_server(t_client *data)
 {
 	log_msg(LOG_INFO, "Attempting to connect to server PID %d",

@@ -3,15 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   crook.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 17:26:43 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 18:30:56 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 04:31:15 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.h"
 
+/**
+ * debug info
+ */
 int	check_client_disconnection(t_client_state *client)
 {
 	if (client->actual_pid == 0)
@@ -22,6 +25,9 @@ int	check_client_disconnection(t_client_state *client)
 	return (0);
 }
 
+/**
+ * not used legacy code
+ */
 int	calculate_checksum(const char *data, int length)
 {
 	int	checksum;
@@ -38,6 +44,9 @@ int	calculate_checksum(const char *data, int length)
 	return (checksum);
 }
 
+/**
+ * quick condition to know which bit was sent
+ */
 int	get_bit_value(int signum)
 {
 	if (signum == SIGUSR1)
@@ -45,6 +54,9 @@ int	get_bit_value(int signum)
 	return (1);
 }
 
+/**
+ * the memory reserver
+ */
 void	memory_reserve_to_store_signals(void)
 {
 	t_client_state	*client;

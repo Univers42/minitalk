@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 18:32:10 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 18:48:06 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 04:16:32 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,28 +26,34 @@
 # define TIMEOUT	50000
 # define SLEEP_TIME 50000
 
+/**
+ * @brief Structure to hold message data and metadata
+ */
 typedef struct s_message
 {
-	char	*message;
-	int		size_message;
+	char	*message;		//pointer to dynamically allocated message content
+	int		size_message;	//Expected tot length of the message in characters
 }	t_message;
 
+/**
+ * @brief Structure to maintain client connection state and mesg reception
+ */
 typedef struct s_client_state
 {
-	pid_t		actual_pid;
-	pid_t		client_pid;
-	int			getting_header;
-	int			getting_msg;
-	int			sig_count;
-	int			char_value;
-	int			msg_pos;
-	int			client_activity;
-	int			transmission_active;
-	int			queue_position;
-	int			sequence_number;
-	int			expected_checksum;
-	int			calculated_checksum;
-	t_message	msg;
+	pid_t		actual_pid;		//PID o fhte currently active/connected client
+	pid_t		client_pid;		//PID of the client sending current signal
+	int			getting_header;	//1 if server is receiving head data : 0
+	int			getting_msg;	//1 if server is receiving msg content:	0
+	int			sig_count;		// Total nbr signal received from curr client
+	int			char_value;		//curr char being assembled from bits
+	int			msg_pos;		//curr position mesg bfufer (character index)
+	int			client_activity;//1 if client is actively sending data: 0
+	int			transmission_active; // 1 if a transmission session	WIP
+	int			queue_position;		//Pos of clien in the server's proc queue
+	int			sequence_number;	// Current sequence number for packet order
+	int			expected_checksum;	//expected checksum value for data verif
+	int			calculated_checksum;// Calculated checksum value from data
+	t_message	msg;				//Message struct containing the msg data
 }	t_client_state;
 
 /* Singleton functions */

@@ -3,15 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   debug.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 17:27:16 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 18:36:54 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 04:30:00 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.h"
 
+/**
+ * send the state to the client 
+ */
 void	set_server_busy(pid_t client_pid)
 {
 	t_client_state	*client;
@@ -22,6 +25,9 @@ void	set_server_busy(pid_t client_pid)
 	log_msg(LOG_INFO, "Server now busy with client PID %d", client_pid);
 }
 
+/**
+ * if it's done or not
+ */
 int	check_client_activity(t_client_state *client, int *i)
 {
 	if (client->client_activity)
@@ -33,6 +39,9 @@ int	check_client_activity(t_client_state *client, int *i)
 	return (0);
 }
 
+/**
+ * print the message 
+ */
 void	print_message(t_client_state *client)
 {
 	write(1, HEADER_MESSAGE, 18);
@@ -40,6 +49,9 @@ void	print_message(t_client_state *client)
 	write(1, "\n", 1);
 }
 
+/**
+ * log to show the bit that has been sent
+ */
 void	log_character_completion(t_client_state *client)
 {
 	char	display_char;

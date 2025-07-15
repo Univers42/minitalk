@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 02:15:33 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 17:12:35 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 03:27:45 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,11 @@ void	signal_handler(int signum, siginfo_t *info, void *context)
 		handle_completion();
 }
 
+/**
+ * validate_and_init done really simple to understand
+ * establish_connection done
+ * prepare_transmission()
+ */
 int	main(int argc, char **argv)
 {
 	t_client	data;

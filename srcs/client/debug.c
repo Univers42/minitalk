@@ -3,15 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   debug.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 16:27:13 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 17:10:38 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 03:42:19 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "client.h"
 
+/**
+ * wrapper debug for faster debugging when repeated accross the implementation
+ */
 void	log_ping_attempt(int attempt, int max_attempts)
 {
 	log_msg(LOG_DEBUG, "Sending ping signal %d/%d to server",

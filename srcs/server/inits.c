@@ -3,15 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   inits.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 17:32:46 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 18:26:08 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 04:39:08 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.h"
 
+/**
+ * here I've deleted at the last minute the
+ * normally redundant initialization
+ */
 t_client_state	*get_client_instance(void)
 {
 	static t_client_state	instance;
@@ -21,12 +25,6 @@ t_client_state	*get_client_instance(void)
 	{
 		ft_memset(&instance, 0, sizeof(t_client_state));
 		instance.getting_header = 1;
-		instance.msg.size_message = 0;
-		instance.transmission_active = 0;
-		instance.queue_position = 0;
-		instance.sequence_number = 0;
-		instance.expected_checksum = 0;
-		instance.calculated_checksum = 0;
 		initialized = 1;
 	}
 	return (&instance);

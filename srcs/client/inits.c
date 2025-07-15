@@ -3,15 +3,48 @@
 /*                                                        :::      ::::::::   */
 /*   inits.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 15:46:56 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 17:12:57 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 03:12:45 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "client.h"
 
+/**
+ * here are the time to speak about sigset and sigaction and their relations
+ * in C, signals are managed using functions liek `sigaddset, sigemptyset,
+ * sigfillset,...`to manipulate signal sets for controlling which signal a
+ * process handlers, blocks or ignore. These are criticle for robust
+ * server-client communication, ensuring signals like `SIGUSR1` and `SIGUSR2`
+ * are used correctly without interference from other signals or 
+ * race conditions
+ * `sigaddset` : Add a specific signal to a signal set
+ * `sigset_t` : Data structures that store a set of signals, used to define
+ * which signal to `block`, `unblock` or `handle`
+ * these functions allow precise control over signal handling, ensuring the
+ * server and client respond only to intended signals for communication
+ * while avoiding unexprected behavior from other signals (SIGINT or SIGTERM)
+ * Selective Signal Handling: Ensure only specific signals 
+ * (SIGUSR1 for client-to-server messages) are processed, ignoring others.
+ 
+    Prevent signals from interrupting critical sections of code,
+ * avoiding race conditions in server-client communication.
+
+ * Robustness: Properly managing signal sets ensures predictable behavior,
+ * especially in concurrent or multi-process environments.
+
+ * Flexibility: Signal sets allow dynamic addition/removal of signals to handle,
+ * supporting complex communication protocols.
+ */
+
+/**
+ * initlize the members of the struct
+ * recheck if server_pid has been correclyt initialized with a value
+ * if not send error
+ * otherwise OK
+ */
 void	init_data(char **argv, t_client *data)
 {
 	ft_memset(data, 0, sizeof(t_client));
@@ -28,6 +61,9 @@ void	init_data(char **argv, t_client *data)
 		data->server_pid);
 }
 
+/**
+ *
+ */
 void	setup_ping_signals(struct sigaction *sa, sigset_t *sigset)
 {
 	sigemptyset(sigset);
@@ -40,6 +76,19 @@ void	setup_ping_signals(struct sigaction *sa, sigset_t *sigset)
 	sigaction(SIGUSR2, sa, NULL);
 }
 
+/**
+ * Sigemptyset does the same job as the ft_memset
+ * just for nomenclature it is best to use this function
+ * as it is more over allowed by the school.
+ * sa->sa_flags tells to use the three parameters of the signal pattern
+ * from the struct of siginfo, this way we can use si_pid
+ * sa->sa_sigaction = signal_handler assign the fn as the handler
+ * for sending the bits
+ * sa->sa_flags = restart and queuing system may be allowed
+ * sigaction() register the configuration liking to the function
+ * ensure SIGUSR1 OR SIGUSR2 when called triggers the
+ * communication handler
+ */
 void	setup_signal_handlers(sigset_t *sigset, struct sigaction *sa)
 {
 	sigemptyset(sigset);
@@ -52,6 +101,7 @@ void	setup_signal_handlers(sigset_t *sigset, struct sigaction *sa)
 	sigaction(SIGUSR2, sa, NULL);
 }
 
+//simple initialization of all variables
 void	reset_server_state(void)
 {
 	t_server_state	*server;
@@ -67,6 +117,14 @@ void	reset_server_state(void)
 	server->ack_count = 0;
 }
 
+/**
+ * This is the maine entry point of the sigaction and
+ * sigset strucures
+ * We use a pointer that point to its member memory to play
+ * around with its datas
+ * Once all is set we start the transmission between the server
+ * and the client
+ */
 void	prepare_transmission(t_client *data, int msg_len)
 {
 	struct sigaction	sa;

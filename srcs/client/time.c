@@ -3,15 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   time.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 16:22:44 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 17:01:35 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 03:56:25 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "client.h"
 
+/**
+ * the main function that tries out to reach the client until it hits
+ * the limit imposed
+ */
 int	handle_timeouts(int pid)
 {
 	int	i;
@@ -31,6 +35,10 @@ int	handle_timeouts(int pid)
 	return (1);
 }
 
+/**
+ * retry protocol just use to be sure that we don't break the sending protocol
+ * too early
+ */
 void	handle_retry_delay(int attempt)
 {
 	if (attempt > RETRY_TIMES / 2)
@@ -42,6 +50,10 @@ void	handle_retry_delay(int attempt)
 		usleep(attempt * 100000);
 }
 
+/**
+ * check if the timeout has been outpassed each time
+ * we need to verify that to avoid an infite pending state
+ */
 int	handle_timeout(int timeout_count, int max_timeout)
 {
 	if (timeout_count > max_timeout)

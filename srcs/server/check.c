@@ -3,15 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   check.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 17:27:58 by codespace         #+#    #+#             */
-/*   Updated: 2025/07/03 17:32:15 by codespace        ###   ########.fr       */
+/*   Updated: 2025/07/15 04:35:21 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.h"
 
+/**
+ * check_clean_status vo
+ */
 int	check_clean_status(void)
 {
 	t_client_state	*client;
