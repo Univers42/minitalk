@@ -597,6 +597,7 @@ The code of minitalk is about making the exchange of signal betweeen a server an
 - `system overload` : heavy system load can introduce delays or also crash
 - `process scheduling`: OS scheduling can introduce scheduling and cause the signal loss
 - `signal loss` : signal can still be lost in extreme conditions, no matter what we intend to do it's impossible to get 100% reliablility.
+- `limit capacity size of arguments` arguments can barely hold 150000 bytes of characters in its content. we would need more to redirect into the stdin and read it but the subject force us to use the command line arguments so we are limited here.
 ### COMMON SOLUTIONS OF OPTIMIZATIONS
 
 using `volatile sig_atomic_t` for the signal flag
@@ -612,4 +613,120 @@ using `volatile sig_atomic_t` for the signal flag
 ##### 4. Proper signal blocking
 
 ##### 5. (forbidden) best practice use mask, real-time signals, exponential backoff, sequence numbers, shared  memory, pipes, sockets...
+### Representation bit terminal
 
+The terminal is act like a state machine to represent a n-byte character representation.
+
+![[representation byte terminal]]
+
+Let's break down how this state machine work
+
+- 0xxxxxxx -> Stays  in SingleByte state (ASCII character)
+- `110xxxxx` -> Enters twoBytes state (expect one more byte)
+- `1110xxxx` ->Enter three bytes state (expect two more bytes)
+- `11110xxx` -> Enter fourbytes state (expect three more bytes)
+
+3. Continuation bytes:
+	- Must start with 10 followed by 6 data bits
+	- Terminal verifies each continuation byte matches this pattern
+	- Invalid patterns trigger ErrorState and reset
+
+### let's take for example '€'
+
+`first byte: 11100010 (€ symbol)` 
+`Second byte: 10100000 (€ symbol)
+Third byte: `10101110` 
+Unused reserved for future
+
+The key to prevent conflict with the ASCII table  is the stricti validation process shown in the diagram:
+	1. sequential validation:
+		1. terminal never interprets bytes until the entire sequence is validated
+		2. each byte must match its expected pattern exactly
+		3. invalid bytes trigger immedaite reset to SingleByte state
+	2. Why ASCII can't conflict:
+		1. ASCII bytes (0xxxxxxx) never appears as `continuation bytes` (10xxxxxxx)
+		2. unicode multi-byte sequences never starts with valid ASCII patterns
+		3. Once in a multi-byte, singl ASCIII byte would cause validation failure
+	3. Practical protection
+		1. Terminal buffer incoming bytes until sequence completion
+		2. Partial sequences trigger reset rather than display
+		3. Invalid sequences trigger rester rather than display
+		4. This ensures consistent interpolation regardless of transmission order.
+The strict state-based approach guarantess that terminals can reliably distinguish between ASCII and UNICODE sequences, even when receiving bytes bit-by-bit, preventing any potential confusion between different encoding types
+
+![[minitalk project idea]]![[minitalk state machine]]
+### UNDERSTANDING THE COMMUNICATION FLOW
+
+##### 1. PID registration phase:
+- Each client registers its PID with the server using `sigaction` 
+- Server stores PIDs in a map structure for tracking multiple clients
+- Registration ensures proper signal routing and client identification
+#### 2. Signal processing
+- Server uses `sigaction` with `SA_SIGINFO` flag to access `siginfo_t` structure
+- `si_pid` field in  `siginfo_t` identifies the sending client
+- Server maintains separate character buffers for each client
+####  3. Timeout & Retry Mechanism
+- Client waits for Ack within tiemout period
+- if no ACK received, client retries the signal
+- Server maintains signal sequence tracking per client
+
+![[server state]]
+Thes server state machine is really simple to understand
+1. server receives either `SIGUSR1` or `SIGUSR2` 
+2. usr `siginfo_t` to identify client and update their buffer
+3. verifies if 8 bits have been received
+4. Processes full character and send `ACKS`
+asyncrhonly active the clients, currently processing, generate the queue of clients waiting to send 
+server switches between clients based on signal receipt
+Each client's state is maintained indenpenedently
+
+
+### let's look at the structure of sigaction
+- `sa_handler` : basic signal handler (not used in Minitalk)
+- `sa_sigaction` : Advanced handler used in Minitalk for PID tracking
+- `sa_mask` : Signal mask to prevent `race conditions` 
+- `sa_flags` : enables SA_SIGINFO for `siginfo_t` access
+
+### Let's take a look at siginfo_t structure
+- `si_pid` : Identifies sending client's process ID
+- `si_signo` : indicates signal type (SIGUSR1/SIGUSR2)
+- `si_code`: Provides additional signal context
+- `si_uid` : User ID of sending process
+
+### Sigset_t structure:
+- Manage signal blocking during critical operations
+- prevint signal racing conditions
+- Ensure atomic oeprations in signal handlers
+
+### Checksum
+1. The server expects a checksum bits after message
+2. Compares received vs calcualted checksum
+3. message integrity verified
+4. integrity check failed
+
+5. Client status management
+		- Successful checksum -> Client marked as reliable
+		- Failed checksum ->client marked as errored
+		- Error clients remain in system but with lower priority
+		- System maintains separate checksum status per client
+
+All of that ensure reliable message transmission while maintaining the system's ability to handle multiple clients and recover from errors. 
+
+this complete system enables reliable communication between multiple clients and teh server, with proper signal hanlding, client management, and error recovery mechanisms.
+
+
+### Relationships between sigaction and sigset_t
+![[relationship sigaction, sigset]]
+
+`sa_mask` benefits is to blocks signals during handler execution
+it has not need for explit blocking/unblocking calls
+and ensure hadnler complete wihtout interruption
+
+### Race condition
+- Signal delivery is atomic - either fully delivered or not at all
+- blocked signals become `pending` rather than beign lost
+- handler execution is guaranteed to complete wihout interruption
+### Practical advantages
+- simpler code with fewr potential race conditions
+- Automatic signal blocking during crtitical operations
+- no need to manage signal masks manually
