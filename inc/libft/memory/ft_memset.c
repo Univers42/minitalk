@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_memset.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dlesieur <dlesieur@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: dlesieur <dlesieur@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/17 14:29:18 by dlesieur          #+#    #+#             */
-/*   Updated: 2025/01/26 19:51:03 by dlesieur         ###   ########.fr       */
+/*   Updated: 2025/07/15 02:46:36 by dlesieur         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,9 +61,17 @@
  * @param num The number of bytes to set.
  * @return A pointer to the memory area `ptr`.
  * 
- * @note The `value` is treated as an unsigned char, 
- * and it is replicated across the `num` bytes.
- */
+ * we set all bytes in the memory of data to `0x00`
+ * (int, char, short, long) -> `0`
+ * (float, double) -> `0`
+ * (pointer) -> `NULL` because (0)
+ * (struct) -> all its bytes `0`
+ * (function pointers) -> `NULL`
+ * struct inside struct ? --> same rule
+ * but it doesn't touch the content behind a pointer
+ * it doesn't malloc memory for the pointers
+ * it does not recursively walk into what pointer to
+*/
 void	*ft_memset(void *ptr, int value, size_t num)
 {
 	unsigned char	*byte;
